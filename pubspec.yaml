@@ -14,9 +14,6 @@ dependencies:
   # Supabase
   supabase_flutter:           # auth, database (Postgres), realtime, storage
 
-  # UI
-  google_fonts:
-
   # Navigation
   go_router:
 
@@ -36,4 +33,15 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/animations/
-    - assets/fonts/
+
+  fonts:
+    - family: Lexend
+      fonts:
+        - asset: assets/fonts/Lexend-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Lexend-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Lexend-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Lexend-Bold.ttf
+          weight: 700
