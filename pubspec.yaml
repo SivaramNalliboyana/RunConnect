@@ -16,6 +16,7 @@ dependencies:
 
   # Media
   image_picker:
+  uuid:
 
   # Navigation
   go_router:

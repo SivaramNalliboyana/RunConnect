@@ -17,8 +17,19 @@ class AuthPage extends StatefulWidget {
 }
 
 class _AuthPageState extends State<AuthPage> {
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   final _picker = ImagePicker();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   Future<void> _pickImage(ImageSource source) async {
     Navigator.pop(context);
@@ -66,6 +77,14 @@ class _AuthPageState extends State<AuthPage> {
     );
   }
 
+  void _onSignUp(BuildContext context) {
+    context.read<AuthBloc>().add(AuthSignUpRequested(
+      _emailController.text,
+      _passwordController.text,
+      _nameController.text,
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
     final hPad = MediaQuery.of(context).size.width * 0.06;
@@ -81,9 +100,19 @@ class _AuthPageState extends State<AuthPage> {
           ),
         ),
       ),
-      body: BlocBuilder<AuthBloc, AuthState>(
+      body: BlocConsumer<AuthBloc, AuthState>(
+        listener: (context, state) {
+          if (state is AuthAuthenticated) {
+            context.go('/home');
+          } else if (state is AuthFailureState) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
+          }
+        },
         builder: (context, state) {
           final imagePath = state is AuthImageSelected ? state.imagePath : null;
+          final isLoading = state is AuthLoading;
 
           return SingleChildScrollView(
             padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 24),
@@ -99,7 +128,7 @@ class _AuthPageState extends State<AuthPage> {
                 ),
                 const SizedBox(height: 32),
                 GestureDetector(
-                  onTap: _showImageSourceSheet,
+                  onTap: isLoading ? null : _showImageSourceSheet,
                   child: Stack(
                     clipBehavior: Clip.none,
                     children: [
@@ -132,22 +161,29 @@ class _AuthPageState extends State<AuthPage> {
                 const SizedBox(height: 32),
                 _label('Full Name'),
                 const SizedBox(height: 8),
-                const TextField(
+                TextField(
+                  controller: _nameController,
                   textInputAction: TextInputAction.next,
+                  enabled: !isLoading,
                 ),
                 const SizedBox(height: 20),
                 _label('Email Address'),
                 const SizedBox(height: 8),
-                const TextField(
+                TextField(
+                  controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
+                  enabled: !isLoading,
                 ),
                 const SizedBox(height: 20),
                 _label('Password'),
                 const SizedBox(height: 8),
                 TextField(
+                  controller: _passwordController,
                   obscureText: _obscurePassword,
                   textInputAction: TextInputAction.done,
+                  enabled: !isLoading,
+                  onSubmitted: (_) => _onSignUp(context),
                   decoration: InputDecoration(
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -161,20 +197,28 @@ class _AuthPageState extends State<AuthPage> {
                     ),
                   ),
                 ),
-                
                 const SizedBox(height: 28),
                 SizedBox(
                   width: double.infinity,
                   height: 52,
                   child: ElevatedButton(
-                    onPressed: () {},
-                    child: Text(
-                      'Sign Up',
-                      style: AppTextStyles.label.copyWith(
-                        color: AppColors.onPrimary,
-                        fontSize: 16,
-                      ),
-                    ),
+                    onPressed: isLoading ? null : () => _onSignUp(context),
+                    child: isLoading
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            'Sign Up',
+                            style: AppTextStyles.label.copyWith(
+                              color: AppColors.onPrimary,
+                              fontSize: 16,
+                            ),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -193,7 +237,7 @@ class _AuthPageState extends State<AuthPage> {
                   width: double.infinity,
                   height: 52,
                   child: OutlinedButton.icon(
-                    onPressed: () {},
+                    onPressed: isLoading ? null : () {},
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: AppColors.neutral),
                       shape: RoundedRectangleBorder(
@@ -210,7 +254,7 @@ class _AuthPageState extends State<AuthPage> {
                   children: [
                     Text('Already have an account?', style: AppTextStyles.bodyMuted),
                     TextButton(
-                      onPressed: () => context.push('/login'),
+                      onPressed: isLoading ? null : () => context.push('/login'),
                       style: TextButton.styleFrom(
                         padding: const EdgeInsets.only(left: 4),
                         minimumSize: Size.zero,

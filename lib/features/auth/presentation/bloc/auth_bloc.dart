@@ -48,7 +48,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onSignUp(AuthSignUpRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
-      await _signUp(event.email, event.password);
+      await _signUp(event.email, event.password, event.name, selectedImage);
       emit(AuthAuthenticated());
     } on AuthFailure catch (e) {
       emit(AuthFailureState(e.message));
