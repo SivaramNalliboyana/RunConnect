@@ -11,65 +11,23 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # UI
-  cupertino_icons: ^1.0.8
-  google_fonts: ^6.2.1
-  flutter_svg: ^2.0.10+1
-  cached_network_image: ^3.4.1
-  shimmer: ^3.0.0
-  gap: ^3.0.1
+  # Supabase
+  supabase_flutter:           # auth, database (Postgres), realtime, storage
 
-  # State management
-  flutter_bloc: ^9.1.0
-  equatable: ^2.0.7
+  # UI
+  google_fonts:
 
   # Navigation
-  go_router: ^15.1.2
+  go_router:
 
-  # Dependency injection
-  get_it: ^8.0.3
-  injectable: ^2.5.0
+  # State Management
+  flutter_bloc:
 
-  # Networking
-  dio: ^5.8.0+1
-  retrofit: ^4.4.1
-  pretty_dio_logger: ^1.4.0
-
-  # Local storage
-  shared_preferences: ^2.5.3
-  flutter_secure_storage: ^9.2.4
-  hive_flutter: ^1.1.0
-
-  # Utilities
-  fpdart: ^1.1.0
-  freezed_annotation: ^2.4.4
-  json_annotation: ^4.9.0
-  logger: ^2.5.0
-  intl: ^0.20.2
-  url_launcher: ^6.3.1
-  connectivity_plus: ^6.1.3
-  package_info_plus: ^8.3.0
-  permission_handler: ^11.4.0
-
-  # Firebase (crash reporting & analytics)
-  firebase_core: ^3.13.0
-  firebase_crashlytics: ^4.3.6
-  firebase_analytics: ^11.4.6
-  firebase_performance: ^0.10.1+6
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^6.0.0
 
-  # Code generation
-  build_runner: ^2.4.14
-  freezed: ^2.5.7
-  json_serializable: ^6.9.4
-  injectable_generator: ^2.7.0
-  retrofit_generator: ^9.1.7
-  hive_generator: ^2.0.1
-  mockito: ^5.4.5
 
 flutter:
   uses-material-design: true
