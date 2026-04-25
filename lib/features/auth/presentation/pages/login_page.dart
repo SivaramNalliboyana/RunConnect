@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:runconnect/core/theme/app_colors.dart';
 import 'package:runconnect/core/theme/app_text_styles.dart';
+import 'package:runconnect/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:runconnect/features/auth/presentation/bloc/auth_event.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -11,11 +14,14 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
   @override
   Widget build(BuildContext context) {
     final hPad = MediaQuery.of(context).size.width * 0.06;
+    AuthBloc authbloc = context.read<AuthBloc>();
 
     return Scaffold(
       appBar: AppBar(
@@ -43,7 +49,8 @@ class _LoginPageState extends State<LoginPage> {
             const SizedBox(height: 40),
             _label('Email Address'),
             const SizedBox(height: 8),
-            const TextField(
+            TextField(
+              controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
             ),
@@ -51,6 +58,7 @@ class _LoginPageState extends State<LoginPage> {
             _label('Password'),
             const SizedBox(height: 8),
             TextField(
+              controller: _passwordController,
               obscureText: _obscurePassword,
               textInputAction: TextInputAction.done,
               decoration: InputDecoration(
@@ -89,7 +97,12 @@ class _LoginPageState extends State<LoginPage> {
               width: double.infinity,
               height: 52,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () => authbloc.add(
+                  AuthSignInRequested(
+                    _emailController.text,
+                    _passwordController.text,
+                  ),
+                ),
                 child: Text(
                   'Log In',
                   style: AppTextStyles.label.copyWith(

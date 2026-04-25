@@ -11,6 +11,8 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> signInWithEmail(String email, String password) async {
     try {
       await _dataSource.signInWithEmail(email, password);
+    } on AuthFailure {
+      rethrow;
     } catch (e) {
       throw AuthFailure(e.toString());
     }
@@ -25,6 +27,8 @@ class AuthRepositoryImpl implements AuthRepository {
   ) async {
     try {
       await _dataSource.signUpWithEmail(email, password, name, image);
+    } on AuthFailure {
+      rethrow;
     } catch (e) {
       throw AuthFailure(e.toString());
     }
@@ -34,6 +38,8 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> signOut() async {
     try {
       await _dataSource.signOut();
+    } on AuthFailure {
+      rethrow;
     } catch (e) {
       throw AuthFailure(e.toString());
     }
