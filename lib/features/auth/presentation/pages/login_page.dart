@@ -3,14 +3,14 @@ import 'package:go_router/go_router.dart';
 import 'package:runconnect/core/theme/app_colors.dart';
 import 'package:runconnect/core/theme/app_text_styles.dart';
 
-class AuthPage extends StatefulWidget {
-  const AuthPage({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  State<AuthPage> createState() => _AuthPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _AuthPageState extends State<AuthPage> {
+class _LoginPageState extends State<LoginPage> {
   bool _obscurePassword = true;
 
   @override
@@ -20,7 +20,7 @@ class _AuthPageState extends State<AuthPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Join RunConnect",
+          'Welcome Back',
           style: TextStyle(
             color: AppColors.primary,
             fontSize: 24,
@@ -33,48 +33,14 @@ class _AuthPageState extends State<AuthPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text('Create Account', style: AppTextStyles.heading2),
+            Text('Log In', style: AppTextStyles.heading2),
             const SizedBox(height: 8),
             Text(
-              'Join the community of elite runners.',
+              'Good to see you again, keep running.',
               style: AppTextStyles.bodyMuted,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 32),
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                CircleAvatar(
-                  radius: 48,
-                  backgroundColor: AppColors.surfaceVariant,
-                  child: const Icon(
-                    Icons.person,
-                    size: 48,
-                    color: AppColors.neutral,
-                  ),
-                ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    width: 28,
-                    height: 28,
-                    decoration: const BoxDecoration(
-                      color: AppColors.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.add, color: Colors.white, size: 18),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 32),
-            _label('Full Name'),
-            const SizedBox(height: 8),
-            const TextField(
-              textInputAction: TextInputAction.next,
-            ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 40),
             _label('Email Address'),
             const SizedBox(height: 8),
             const TextField(
@@ -100,6 +66,24 @@ class _AuthPageState extends State<AuthPage> {
                 ),
               ),
             ),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {},
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  'Forgot Password?',
+                  style: AppTextStyles.label.copyWith(
+                    color: AppColors.secondary,
+                  ),
+                ),
+              ),
+            ),
             const SizedBox(height: 28),
             SizedBox(
               width: double.infinity,
@@ -107,7 +91,7 @@ class _AuthPageState extends State<AuthPage> {
               child: ElevatedButton(
                 onPressed: () {},
                 child: Text(
-                  'Sign Up',
+                  'Log In',
                   style: AppTextStyles.label.copyWith(
                     color: AppColors.onPrimary,
                     fontSize: 16,
@@ -150,19 +134,16 @@ class _AuthPageState extends State<AuthPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  'Already have an account?',
-                  style: AppTextStyles.bodyMuted,
-                ),
+                Text("Don't have an account?", style: AppTextStyles.bodyMuted),
                 TextButton(
-                  onPressed: () => context.push('/login'),
+                  onPressed: () => context.pop(),
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.only(left: 4),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   child: Text(
-                    'Log In',
+                    'Sign Up',
                     style: AppTextStyles.label.copyWith(
                       color: AppColors.primary,
                     ),
