@@ -102,9 +102,7 @@ class _AuthPageState extends State<AuthPage> {
       ),
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthAuthenticated) {
-            context.go('/home');
-          } else if (state is AuthFailureState) {
+          if (state is AuthFailureState) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
             );

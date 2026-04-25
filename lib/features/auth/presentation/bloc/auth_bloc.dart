@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:runconnect/core/error/failures.dart';
 import 'package:runconnect/features/auth/domain/use_cases/sign_in_use_case.dart';
 import 'package:runconnect/features/auth/domain/use_cases/sign_out_use_case.dart';
 import 'package:runconnect/features/auth/domain/use_cases/sign_up_use_case.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 import 'auth_event.dart';
 import 'auth_state.dart';
 
@@ -11,6 +13,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SignInUseCase _signIn;
   final SignUpUseCase _signUp;
   final SignOutUseCase _signOut;
+  late final StreamSubscription<sb.AuthState> _authSubscription;
 
   XFile? selectedImage;
 
@@ -26,6 +29,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthSignUpRequested>(_onSignUp);
     on<AuthSignOutRequested>(_onSignOut);
     on<AuthProfileImagePicked>(_onImagePicked);
+
+    _authSubscription = sb.Supabase.instance.client.auth.onAuthStateChange.listen(
+      (data) {
+        data.session != null ? add(_SessionChanged(true)) : add(_SessionChanged(false));
+      },
+    );
+    on<_SessionChanged>(_onSessionChanged);
+  }
+
+  void _onSessionChanged(_SessionChanged event, Emitter<AuthState> emit) {
+    event.isAuthenticated ? emit(AuthAuthenticated()) : emit(AuthUnauthenticated());
   }
 
   void _onImagePicked(AuthProfileImagePicked event, Emitter<AuthState> emit) {
@@ -61,11 +75,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
     try {
       await _signOut();
-      emit(AuthUnauthenticated());
     } on AuthFailure catch (e) {
       emit(AuthFailureState(e.message));
     } catch (e) {
       emit(AuthFailureState('Something went wrong'));
     }
   }
+
+  @override
+  Future<void> close() {
+    _authSubscription.cancel();
+    return super.close();
+  }
+}
+
+class _SessionChanged extends AuthEvent {
+  final bool isAuthenticated;
+  _SessionChanged(this.isAuthenticated);
 }

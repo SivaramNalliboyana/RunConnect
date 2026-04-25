@@ -8,20 +8,18 @@ import 'package:runconnect/features/auth/domain/use_cases/sign_in_use_case.dart'
 import 'package:runconnect/features/auth/domain/use_cases/sign_out_use_case.dart';
 import 'package:runconnect/features/auth/domain/use_cases/sign_up_use_case.dart';
 import 'package:runconnect/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:runconnect/features/auth/presentation/bloc/auth_state.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 import 'package:runconnect/core/router/app_router.dart';
 import 'package:runconnect/core/theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   await dotenv.load(fileName: ".env");
-
   await Supabase.initialize(
     url: AppConfig.supabaseUrl,
     anonKey: AppConfig.annonkey,
   );
-
   runApp(const RunConnectApp());
 }
 
@@ -48,6 +46,13 @@ class RunConnectApp extends StatelessWidget {
         title: 'RunConnect',
         routerConfig: appRouter,
         theme: appTheme,
+        builder: (context, child) => BlocListener<AuthBloc, AuthState>(
+          listener: (context, state) {
+            if (state is AuthAuthenticated) appRouter.go('/feed');
+            if (state is AuthUnauthenticated) appRouter.go('/auth');
+          },
+          child: child!,
+        ),
       ),
     );
   }
