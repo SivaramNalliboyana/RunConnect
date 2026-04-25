@@ -12,7 +12,6 @@ abstract class AuthRemoteDataSource {
     XFile? image,
   );
   Future<void> signOut();
-  bool get isAuthenticated;
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -86,6 +85,4 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
   }
 
-  @override
-  bool get isAuthenticated => _client.auth.currentSession != null;
 }

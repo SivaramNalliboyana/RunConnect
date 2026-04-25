@@ -45,6 +45,4 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
-  @override
-  bool get isAuthenticated => _dataSource.isAuthenticated;
 }

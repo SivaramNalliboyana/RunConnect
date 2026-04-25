@@ -9,5 +9,4 @@ abstract class AuthRepository {
     XFile? image,
   );
   Future<void> signOut();
-  bool get isAuthenticated;
 }
