@@ -8,6 +8,11 @@ class AuthSignInRequested extends AuthEvent {
   AuthSignInRequested(this.email, this.password);
 }
 
+class SessionChanged extends AuthEvent {
+  final bool isAuthenticated;
+  SessionChanged(this.isAuthenticated);
+}
+
 class AuthSignUpRequested extends AuthEvent {
   final String email;
   final String password;

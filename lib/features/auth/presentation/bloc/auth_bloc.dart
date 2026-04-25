@@ -21,25 +21,28 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required SignInUseCase signIn,
     required SignUpUseCase signUp,
     required SignOutUseCase signOut,
-  })  : _signIn = signIn,
-        _signUp = signUp,
-        _signOut = signOut,
-        super(AuthInitial()) {
+  }) : _signIn = signIn,
+       _signUp = signUp,
+       _signOut = signOut,
+       super(AuthInitial()) {
     on<AuthSignInRequested>(_onSignIn);
     on<AuthSignUpRequested>(_onSignUp);
     on<AuthSignOutRequested>(_onSignOut);
     on<AuthProfileImagePicked>(_onImagePicked);
 
-    _authSubscription = sb.Supabase.instance.client.auth.onAuthStateChange.listen(
-      (data) {
-        data.session != null ? add(_SessionChanged(true)) : add(_SessionChanged(false));
-      },
-    );
-    on<_SessionChanged>(_onSessionChanged);
+    _authSubscription = sb.Supabase.instance.client.auth.onAuthStateChange
+        .listen((data) {
+          data.session != null
+              ? add(SessionChanged(true))
+              : add(SessionChanged(false));
+        });
+    on<SessionChanged>(_onSessionChanged);
   }
 
-  void _onSessionChanged(_SessionChanged event, Emitter<AuthState> emit) {
-    event.isAuthenticated ? emit(AuthAuthenticated()) : emit(AuthUnauthenticated());
+  void _onSessionChanged(SessionChanged event, Emitter<AuthState> emit) {
+    event.isAuthenticated
+        ? emit(AuthAuthenticated())
+        : emit(AuthUnauthenticated());
   }
 
   void _onImagePicked(AuthProfileImagePicked event, Emitter<AuthState> emit) {
@@ -47,7 +50,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthImageSelected(event.image.path));
   }
 
-  Future<void> _onSignIn(AuthSignInRequested event, Emitter<AuthState> emit) async {
+  Future<void> _onSignIn(
+    AuthSignInRequested event,
+    Emitter<AuthState> emit,
+  ) async {
     emit(AuthLoading());
     try {
       await _signIn(event.email, event.password);
@@ -59,7 +65,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onSignUp(AuthSignUpRequested event, Emitter<AuthState> emit) async {
+  Future<void> _onSignUp(
+    AuthSignUpRequested event,
+    Emitter<AuthState> emit,
+  ) async {
     emit(AuthLoading());
     try {
       await _signUp(event.email, event.password, event.name, selectedImage);
@@ -71,7 +80,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onSignOut(AuthSignOutRequested event, Emitter<AuthState> emit) async {
+  Future<void> _onSignOut(
+    AuthSignOutRequested event,
+    Emitter<AuthState> emit,
+  ) async {
     emit(AuthLoading());
     try {
       await _signOut();
@@ -87,9 +99,4 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     _authSubscription.cancel();
     return super.close();
   }
-}
-
-class _SessionChanged extends AuthEvent {
-  final bool isAuthenticated;
-  _SessionChanged(this.isAuthenticated);
 }
