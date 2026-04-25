@@ -12,3 +12,8 @@ class AuthFailureState extends AuthState {
   final String message;
   AuthFailureState(this.message);
 }
+
+class AuthImageSelected extends AuthState {
+  final String imagePath;
+  AuthImageSelected(this.imagePath);
+}

@@ -14,11 +14,16 @@ dependencies:
   # Supabase
   supabase_flutter:           # auth, database (Postgres), realtime, storage
 
+  # Media
+  image_picker:
+
   # Navigation
   go_router:
 
   # State Management
   flutter_bloc:
+
+  flutter_dotenv:
 
 
 dev_dependencies:
@@ -33,6 +38,7 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/animations/
+    - .env
 
   fonts:
     - family: Lexend

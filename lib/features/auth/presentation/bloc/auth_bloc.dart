@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:runconnect/core/error/failures.dart';
 import 'package:runconnect/features/auth/domain/use_cases/sign_in_use_case.dart';
 import 'package:runconnect/features/auth/domain/use_cases/sign_out_use_case.dart';
@@ -11,6 +12,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SignUpUseCase _signUp;
   final SignOutUseCase _signOut;
 
+  XFile? selectedImage;
+
   AuthBloc({
     required SignInUseCase signIn,
     required SignUpUseCase signUp,
@@ -22,6 +25,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthSignInRequested>(_onSignIn);
     on<AuthSignUpRequested>(_onSignUp);
     on<AuthSignOutRequested>(_onSignOut);
+    on<AuthProfileImagePicked>(_onImagePicked);
+  }
+
+  void _onImagePicked(AuthProfileImagePicked event, Emitter<AuthState> emit) {
+    selectedImage = event.image;
+    emit(AuthImageSelected(event.image.path));
   }
 
   Future<void> _onSignIn(AuthSignInRequested event, Emitter<AuthState> emit) async {
@@ -31,6 +40,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthAuthenticated());
     } on AuthFailure catch (e) {
       emit(AuthFailureState(e.message));
+    } catch (e) {
+      emit(AuthFailureState('Something went wrong'));
     }
   }
 
@@ -41,6 +52,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthAuthenticated());
     } on AuthFailure catch (e) {
       emit(AuthFailureState(e.message));
+    } catch (e) {
+      emit(AuthFailureState('Something went wrong'));
     }
   }
 
@@ -51,6 +64,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthUnauthenticated());
     } on AuthFailure catch (e) {
       emit(AuthFailureState(e.message));
+    } catch (e) {
+      emit(AuthFailureState('Something went wrong'));
     }
   }
 }

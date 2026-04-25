@@ -1,3 +1,5 @@
+import 'package:image_picker/image_picker.dart';
+
 abstract class AuthEvent {}
 
 class AuthSignInRequested extends AuthEvent {
@@ -13,3 +15,8 @@ class AuthSignUpRequested extends AuthEvent {
 }
 
 class AuthSignOutRequested extends AuthEvent {}
+
+class AuthProfileImagePicked extends AuthEvent {
+  final XFile image;
+  AuthProfileImagePicked(this.image);
+}
