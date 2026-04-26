@@ -3,7 +3,20 @@ import 'package:runconnect/core/theme/app_colors.dart';
 import 'package:runconnect/core/theme/app_text_styles.dart';
 
 class DateTimeSection extends StatelessWidget {
-  const DateTimeSection({super.key});
+  const DateTimeSection({
+    super.key,
+    this.date,
+    this.time,
+    this.locationController,
+    this.onPickDate,
+    this.onPickTime,
+  });
+
+  final DateTime? date;
+  final TimeOfDay? time;
+  final TextEditingController? locationController;
+  final VoidCallback? onPickDate;
+  final VoidCallback? onPickTime;
 
   @override
   Widget build(BuildContext context) {
@@ -26,20 +39,24 @@ class DateTimeSection extends StatelessWidget {
           Text('Date & Time', style: AppTextStyles.label),
           const SizedBox(height: 8),
           Row(
-            children: const [
+            children: [
               Expanded(
                 flex: 2,
-                child: _IconField(
+                child: _PickerField(
                   icon: Icons.calendar_today_outlined,
                   hint: 'mm/dd/yyyy',
+                  value: date == null ? null : _formatDate(date!),
+                  onTap: onPickDate,
                 ),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Expanded(
                 flex: 1,
-                child: _IconField(
+                child: _PickerField(
                   icon: Icons.access_time,
                   hint: '--:-- --',
+                  value: time == null ? null : _formatTime(time!),
+                  onTap: onPickTime,
                 ),
               ),
             ],
@@ -47,10 +64,27 @@ class DateTimeSection extends StatelessWidget {
           const SizedBox(height: 16),
           Text('Meeting Point', style: AppTextStyles.label),
           const SizedBox(height: 8),
-          const _IconField(
-            icon: Icons.location_on,
-            hint: 'Search for a location...',
-            iconColor: AppColors.primary,
+          TextField(
+            controller: locationController,
+            decoration: InputDecoration(
+              hintText: 'Search for a location...',
+              hintStyle: AppTextStyles.bodyMuted,
+              prefixIcon: const Icon(
+                Icons.location_on,
+                size: 20,
+                color: AppColors.primary,
+              ),
+              prefixIconConstraints: const BoxConstraints(minWidth: 36),
+              filled: true,
+              fillColor: AppColors.surface,
+              border: _border(),
+              enabledBorder: _border(),
+              focusedBorder: _border(),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 4,
+                vertical: 12,
+              ),
+            ),
           ),
           const SizedBox(height: 12),
           const _MapPreview(),
@@ -58,49 +92,68 @@ class DateTimeSection extends StatelessWidget {
       ),
     );
   }
+
+  static OutlineInputBorder _border() => OutlineInputBorder(
+    borderRadius: BorderRadius.circular(8),
+    borderSide: const BorderSide(color: Colors.black12),
+  );
+
+  static String _formatDate(DateTime d) =>
+      '${d.month.toString().padLeft(2, '0')}/'
+      '${d.day.toString().padLeft(2, '0')}/'
+      '${d.year}';
+
+  static String _formatTime(TimeOfDay t) {
+    final h = t.hourOfPeriod == 0 ? 12 : t.hourOfPeriod;
+    final period = t.period == DayPeriod.am ? 'AM' : 'PM';
+    return '${h.toString().padLeft(2, '0')}:'
+        '${t.minute.toString().padLeft(2, '0')} $period';
+  }
 }
 
-class _IconField extends StatelessWidget {
-  const _IconField({
+class _PickerField extends StatelessWidget {
+  const _PickerField({
     required this.icon,
     required this.hint,
-    this.iconColor,
+    required this.value,
+    required this.onTap,
   });
 
   final IconData icon;
   final String hint;
-  final Color? iconColor;
+  final String? value;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      readOnly: true,
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: AppTextStyles.bodyMuted,
-        prefixIcon: Icon(
-          icon,
-          size: 18,
-          color: iconColor ?? AppColors.textMuted,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.black12),
         ),
-        prefixIconConstraints: const BoxConstraints(minWidth: 36),
-        filled: true,
-        fillColor: AppColors.surface,
-        border: _border(),
-        enabledBorder: _border(),
-        focusedBorder: _border(),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 4,
-          vertical: 12,
+        child: Row(
+          children: [
+            Icon(icon, size: 18, color: AppColors.textMuted),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                value ?? hint,
+                style: value == null
+                    ? AppTextStyles.bodyMuted
+                    : AppTextStyles.body,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
-
-  OutlineInputBorder _border() => OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Colors.black12),
-      );
 }
 
 class _MapPreview extends StatelessWidget {

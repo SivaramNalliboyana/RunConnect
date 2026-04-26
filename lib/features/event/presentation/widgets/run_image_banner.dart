@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 class RunImageBanner extends StatelessWidget {
-  const RunImageBanner({super.key, this.onTap});
+  const RunImageBanner({super.key, this.imagePath, this.onTap});
 
+  final String? imagePath;
   final VoidCallback? onTap;
 
   @override
@@ -16,27 +19,31 @@ class RunImageBanner extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              const DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0xFF6FA0B5),
-                      Color(0xFF4F7C8A),
-                      Color(0xFF3A2A20),
-                    ],
-                    stops: [0.0, 0.7, 1.0],
+              if (imagePath != null)
+                Image.file(File(imagePath!), fit: BoxFit.cover)
+              else ...[
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Color(0xFF6FA0B5),
+                        Color(0xFF4F7C8A),
+                        Color(0xFF3A2A20),
+                      ],
+                      stops: [0.0, 0.7, 1.0],
+                    ),
                   ),
                 ),
-              ),
-              const Center(
-                child: Icon(
-                  Icons.directions_run,
-                  size: 96,
-                  color: Color(0xCC1A1A1A),
+                const Center(
+                  child: Icon(
+                    Icons.directions_run,
+                    size: 96,
+                    color: Color(0xCC1A1A1A),
+                  ),
                 ),
-              ),
+              ],
               Positioned(
                 top: 12,
                 right: 12,

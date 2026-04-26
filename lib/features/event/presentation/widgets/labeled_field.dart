@@ -6,11 +6,13 @@ class LabeledField extends StatelessWidget {
   const LabeledField({
     super.key,
     required this.label,
+    this.controller,
     this.suffix,
     this.keyboardType,
   });
 
   final String label;
+  final TextEditingController? controller;
   final String? suffix;
   final TextInputType? keyboardType;
 
@@ -22,6 +24,7 @@ class LabeledField extends StatelessWidget {
         Text(label, style: AppTextStyles.label),
         const SizedBox(height: 6),
         TextField(
+          controller: controller,
           keyboardType: keyboardType,
           decoration: InputDecoration(
             filled: true,
