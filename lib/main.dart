@@ -46,6 +46,9 @@ class RunConnectApp extends StatelessWidget {
         title: 'RunConnect',
         routerConfig: appRouter,
         theme: appTheme,
+        scrollBehavior: const MaterialScrollBehavior().copyWith(
+          overscroll: false,
+        ),
         builder: (context, child) => BlocListener<AuthBloc, AuthState>(
           listener: (context, state) {
             if (state is AuthAuthenticated) appRouter.go('/feed');
