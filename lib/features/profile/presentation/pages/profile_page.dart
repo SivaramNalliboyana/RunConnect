@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:runconnect/core/theme/app_colors.dart';
 import 'package:runconnect/features/profile/domain/entities/past_activity.dart';
 import 'package:runconnect/features/profile/domain/entities/user_profile.dart';
@@ -89,6 +90,8 @@ class ProfilePage extends StatelessWidget {
                     FollowStatsRow(
                       followingCount: _mockProfile.followingCount,
                       followersCount: _mockProfile.followersCount,
+                      onFollowingTap: () => context.push('/profile/following'),
+                      onFollowersTap: () => context.push('/profile/followers'),
                     ),
                     const SizedBox(height: 20),
                     TotalKmCard(totalKm: _mockProfile.totalKmRun),

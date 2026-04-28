@@ -1,4 +1,5 @@
 import 'package:runconnect/features/profile/domain/entities/past_activity.dart';
+import 'package:runconnect/features/profile/domain/entities/profile_summary.dart';
 import 'package:runconnect/features/profile/domain/entities/user_profile.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -6,6 +7,10 @@ abstract class ProfileRemoteDataSource {
   Future<UserProfile> getUserProfile(String userId);
 
   Future<List<PastActivity>> getPastActivities(String userId);
+
+  Future<List<ProfileSummary>> getFollowing(String userId);
+
+  Future<List<ProfileSummary>> getFollowers(String userId);
 }
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
@@ -19,6 +24,16 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
   @override
   Future<List<PastActivity>> getPastActivities(String userId) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List<ProfileSummary>> getFollowing(String userId) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List<ProfileSummary>> getFollowers(String userId) {
     throw UnimplementedError();
   }
 }
