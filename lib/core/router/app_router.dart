@@ -9,6 +9,7 @@ import 'package:runconnect/features/event/presentation/pages/create_event_page.d
 import 'package:runconnect/features/feed/presentation/pages/feed_page.dart';
 import 'package:runconnect/features/map/presentation/pages/map_page.dart';
 import 'package:runconnect/features/profile/presentation/pages/follow_list_page.dart';
+import 'package:runconnect/features/profile/presentation/pages/past_activities_page.dart';
 import 'package:runconnect/features/profile/presentation/pages/profile_page.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -45,6 +46,11 @@ final appRouter = GoRouter(
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) =>
           const FollowListPage(mode: FollowListMode.followers),
+    ),
+    GoRoute(
+      path: '/profile/past-activities',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const PastActivitiesPage(),
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>

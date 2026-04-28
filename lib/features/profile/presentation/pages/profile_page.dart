@@ -118,7 +118,7 @@ class ProfilePage extends StatelessWidget {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () {},
+                      onTap: () => context.push('/profile/past-activities'),
                       child: const Text(
                         'View all',
                         style: TextStyle(
@@ -140,7 +140,10 @@ class ProfilePage extends StatelessWidget {
                   children: [
                     for (var i = 0; i < _mockActivities.length; i++) ...[
                       if (i > 0) const SizedBox(width: 12),
-                      PastActivityCard(activity: _mockActivities[i]),
+                      SizedBox(
+                        width: 280,
+                        child: PastActivityCard(activity: _mockActivities[i]),
+                      ),
                     ],
                   ],
                 ),
