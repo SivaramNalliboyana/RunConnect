@@ -95,6 +95,7 @@ class ProfilePage extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     TotalKmCard(totalKm: _mockProfile.totalKmRun),
+                    
                     const SizedBox(height: 12),
                     EventsStatsRow(
                       eventsJoined: _mockProfile.eventsJoined,
