@@ -53,7 +53,24 @@ class FeedEventCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(height: 170, child: _Banner(imageUrl: event.imageUrl)),
+          SizedBox(
+            height: 170,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                _Banner(imageUrl: event.imageUrl),
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: _GoingBadge(
+                    isFull: isFull,
+                    current: event.currentParticipants,
+                    max: event.maxParticipants,
+                  ),
+                ),
+              ],
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
             child: Column(
@@ -70,6 +87,11 @@ class FeedEventCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
+                _HostRow(
+                  name: event.hostName,
+                  avatarUrl: event.hostAvatarUrl,
+                ),
+                const SizedBox(height: 10),
                 Row(
                   children: [
                     const Icon(
@@ -91,20 +113,22 @@ class FeedEventCard extends StatelessWidget {
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    Icon(
-                      Icons.people_outline,
+                    const Icon(
+                      Icons.location_on_outlined,
                       size: 14,
-                      color: isFull ? AppColors.error : AppColors.primary,
+                      color: AppColors.primary,
                     ),
                     const SizedBox(width: 6),
-                    Text(
-                      isFull
-                          ? 'Full'
-                          : '${event.currentParticipants}/${event.maxParticipants} going',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: isFull ? AppColors.error : AppColors.textMuted,
+                    Expanded(
+                      child: Text(
+                        event.meetingPoint,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textMuted,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ],
@@ -149,6 +173,107 @@ class FeedEventCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _GoingBadge extends StatelessWidget {
+  const _GoingBadge({
+    required this.isFull,
+    required this.current,
+    required this.max,
+  });
+
+  final bool isFull;
+  final int current;
+  final int max;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.only(bottomLeft: Radius.circular(16)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.people_outline,
+            size: 14,
+            color: isFull ? AppColors.error : AppColors.primary,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            isFull ? 'Full' : '$current/$max going',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: isFull ? AppColors.error : AppColors.onBackground,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HostRow extends StatelessWidget {
+  const _HostRow({required this.name, this.avatarUrl});
+
+  final String name;
+  final String? avatarUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 22,
+          height: 22,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.surfaceVariant,
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: avatarUrl == null || avatarUrl!.isEmpty
+              ? const Icon(Icons.person, size: 14, color: AppColors.textMuted)
+              : Image.network(
+                  avatarUrl!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const Icon(
+                    Icons.person,
+                    size: 14,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+        ),
+        const SizedBox(width: 8),
+        Flexible(
+          child: RichText(
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            text: TextSpan(
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.textMuted,
+                fontWeight: FontWeight.w500,
+              ),
+              children: [
+                const TextSpan(text: 'Hosted by '),
+                TextSpan(
+                  text: name,
+                  style: const TextStyle(
+                    color: AppColors.onBackground,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

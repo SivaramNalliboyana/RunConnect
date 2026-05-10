@@ -18,6 +18,8 @@ class FeedPage extends StatelessWidget {
       startsAt: DateTime(2024, 10, 12, 7, 30),
       meetingPoint: 'Brandenburg Gate',
       imageUrl: "",
+      hostName: 'Lena Becker',
+      hostAvatarUrl: null,
     ),
     Event(
       id: '2',
@@ -30,6 +32,8 @@ class FeedPage extends StatelessWidget {
       startsAt: DateTime(2024, 11, 5, 6, 0),
       meetingPoint: 'Alpine Trailhead',
       imageUrl: "",
+      hostName: 'Marco Rossi',
+      hostAvatarUrl: null,
     ),
     Event(
       id: '3',
@@ -42,6 +46,8 @@ class FeedPage extends StatelessWidget {
       startsAt: DateTime(2024, 10, 28, 18, 15),
       meetingPoint: 'Riverside Park',
       imageUrl: "",
+      hostName: 'Sarah Johnson',
+      hostAvatarUrl: null,
     ),
   ];
 

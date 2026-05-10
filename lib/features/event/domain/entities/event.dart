@@ -58,6 +58,8 @@ class Event {
   final DateTime startsAt;
   final String meetingPoint;
   final String? imageUrl;
+  final String hostName;
+  final String? hostAvatarUrl;
 
   const Event({
     required this.id,
@@ -68,8 +70,10 @@ class Event {
     required this.category,
     required this.startsAt,
     required this.meetingPoint,
+    required this.hostName,
     this.currentParticipants = 0,
     this.imageUrl,
+    this.hostAvatarUrl,
   });
 
   bool get isFull => currentParticipants >= maxParticipants;
