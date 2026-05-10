@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:runconnect/core/error/failures.dart';
 import 'package:runconnect/features/event/domain/use_cases/create_event_use_case.dart';
 import 'create_event_event.dart';
 import 'create_event_state.dart';
@@ -18,7 +19,7 @@ class CreateEventBloc extends Bloc<CreateEventEvent, CreateEventState> {
     CreateEventImagePicked event,
     Emitter<CreateEventState> emit,
   ) {
-    emit(state.copyWith(imagePath: event.image.path));
+    emit(state.copyWith(image: event.image));
   }
 
   void _onPaceLevelSelected(
@@ -32,6 +33,29 @@ class CreateEventBloc extends Bloc<CreateEventEvent, CreateEventState> {
     CreateEventSubmitted event,
     Emitter<CreateEventState> emit,
   ) async {
-    // TODO: implement using _createEvent
+    final paceLevel = state.paceLevel;
+    if (paceLevel == null) {
+      emit(state.copyWith(errorMessage: 'Select a pace level'));
+      return;
+    }
+
+    emit(state.copyWith(isSubmitting: true, errorMessage: null));
+
+    try {
+      final created = await _createEvent(
+        title: event.title,
+        distanceKm: event.distanceKm,
+        maxParticipants: event.maxParticipants,
+        paceLevel: paceLevel,
+        startsAt: event.startsAt,
+        meetingPoint: event.meetingPoint,
+        image: state.image,
+      );
+      emit(state.copyWith(isSubmitting: false, createdEvent: created));
+    } on Failure catch (e) {
+      emit(state.copyWith(isSubmitting: false, errorMessage: e.message));
+    } catch (e) {
+      emit(state.copyWith(isSubmitting: false, errorMessage: e.toString()));
+    }
   }
 }

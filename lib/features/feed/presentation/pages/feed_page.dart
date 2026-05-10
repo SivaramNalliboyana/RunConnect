@@ -14,7 +14,6 @@ class FeedPage extends StatelessWidget {
       maxParticipants: 30,
       currentParticipants: 18,
       paceLevel: PaceLevel.intermediate,
-      category: EventCategory.marathon,
       startsAt: DateTime(2024, 10, 12, 7, 30),
       meetingPoint: 'Brandenburg Gate',
       imageUrl: "",
@@ -28,7 +27,6 @@ class FeedPage extends StatelessWidget {
       maxParticipants: 20,
       currentParticipants: 20,
       paceLevel: PaceLevel.advanced,
-      category: EventCategory.trail,
       startsAt: DateTime(2024, 11, 5, 6, 0),
       meetingPoint: 'Alpine Trailhead',
       imageUrl: "",
@@ -42,7 +40,6 @@ class FeedPage extends StatelessWidget {
       maxParticipants: 50,
       currentParticipants: 22,
       paceLevel: PaceLevel.intermediate,
-      category: EventCategory.community,
       startsAt: DateTime(2024, 10, 28, 18, 15),
       meetingPoint: 'Riverside Park',
       imageUrl: "",
@@ -130,7 +127,6 @@ class FeedPage extends StatelessWidget {
               itemCount: _mockEvents.length,
               separatorBuilder: (_, __) => const SizedBox(height: 14),
               itemBuilder: (context, index) {
-                print(_mockEvents[index].category);
                 return FeedEventCard(
                   event: _mockEvents[index],
                   onJoinPressed: () {},

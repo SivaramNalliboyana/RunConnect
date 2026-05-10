@@ -15,6 +15,14 @@ class CreateEventUseCase {
     required String meetingPoint,
     XFile? image,
   }) {
-    throw UnimplementedError();
+    return _repository.createEvent(
+      title: title,
+      distanceKm: distanceKm,
+      maxParticipants: maxParticipants,
+      paceLevel: paceLevel,
+      startsAt: startsAt,
+      meetingPoint: meetingPoint,
+      image: image,
+    );
   }
 }

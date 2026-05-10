@@ -28,25 +28,6 @@ extension PaceLevelDisplay on PaceLevel {
   }
 }
 
-enum EventCategory { marathon, trail, community, road, sprint }
-
-extension EventCategoryDisplay on EventCategory {
-  String get label {
-    switch (this) {
-      case EventCategory.marathon:
-        return 'MARATHON';
-      case EventCategory.trail:
-        return 'TRAIL';
-      case EventCategory.community:
-        return 'COMMUNITY';
-      case EventCategory.road:
-        return 'ROAD';
-      case EventCategory.sprint:
-        return 'SPRINT';
-    }
-  }
-}
-
 class Event {
   final String id;
   final String title;
@@ -54,7 +35,6 @@ class Event {
   final int maxParticipants;
   final int currentParticipants;
   final PaceLevel paceLevel;
-  final EventCategory category;
   final DateTime startsAt;
   final String meetingPoint;
   final String? imageUrl;
@@ -67,7 +47,6 @@ class Event {
     required this.distanceKm,
     required this.maxParticipants,
     required this.paceLevel,
-    required this.category,
     required this.startsAt,
     required this.meetingPoint,
     required this.hostName,
