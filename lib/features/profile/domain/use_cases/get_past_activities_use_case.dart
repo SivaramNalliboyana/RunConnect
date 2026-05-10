@@ -5,7 +5,6 @@ class GetPastActivitiesUseCase {
   final ProfileRepository _repository;
   GetPastActivitiesUseCase(this._repository);
 
-  Future<List<PastActivity>> call(String userId) {
-    throw UnimplementedError();
-  }
+  Future<List<PastActivity>> call(String userId) =>
+      _repository.getPastActivities(userId);
 }

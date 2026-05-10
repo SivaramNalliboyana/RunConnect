@@ -5,7 +5,6 @@ class GetFollowersUseCase {
   final ProfileRepository _repository;
   GetFollowersUseCase(this._repository);
 
-  Future<List<ProfileSummary>> call(String userId) {
-    throw UnimplementedError();
-  }
+  Future<List<ProfileSummary>> call(String userId) =>
+      _repository.getFollowers(userId);
 }

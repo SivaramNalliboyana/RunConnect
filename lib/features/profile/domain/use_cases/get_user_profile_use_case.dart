@@ -5,7 +5,5 @@ class GetUserProfileUseCase {
   final ProfileRepository _repository;
   GetUserProfileUseCase(this._repository);
 
-  Future<UserProfile> call(String userId) {
-    throw UnimplementedError();
-  }
+  Future<UserProfile> call(String userId) => _repository.getUserProfile(userId);
 }
