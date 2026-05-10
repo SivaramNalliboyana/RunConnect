@@ -17,4 +17,15 @@ class FeedRepositoryImpl implements FeedRepository {
       throw ServerFailure(e.toString());
     }
   }
+
+  @override
+  Future<Set<String>> getJoinedEventIds() async {
+    try {
+      return await _dataSource.getJoinedEventIds();
+    } on ServerFailure {
+      rethrow;
+    } catch (e) {
+      throw ServerFailure(e.toString());
+    }
+  }
 }

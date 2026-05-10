@@ -8,10 +8,12 @@ class FeedEventCard extends StatelessWidget {
     super.key,
     required this.event,
     required this.onJoinPressed,
+    this.isJoined = false,
   });
 
   final Event event;
   final VoidCallback onJoinPressed;
+  final bool isJoined;
 
   static const _months = [
     'Jan',
@@ -164,7 +166,8 @@ class FeedEventCard extends StatelessWidget {
                     ),
                     _JoinButton(
                       isFull: isFull,
-                      onPressed: isFull ? null : onJoinPressed,
+                      isJoined: isJoined,
+                      onPressed: (isFull && !isJoined) ? null : onJoinPressed,
                     ),
                   ],
                 ),
@@ -279,30 +282,42 @@ class _HostRow extends StatelessWidget {
 }
 
 class _JoinButton extends StatelessWidget {
-  const _JoinButton({required this.isFull, required this.onPressed});
+  const _JoinButton({
+    required this.isFull,
+    required this.isJoined,
+    required this.onPressed,
+  });
 
   final bool isFull;
+  final bool isJoined;
   final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
+    final label = isJoined ? 'Leave' : (isFull ? 'Full' : 'Join');
+    final background = isJoined ? AppColors.surface : AppColors.primary;
+    final foreground = isJoined ? AppColors.primary : AppColors.onPrimary;
+
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.onPrimary,
+        backgroundColor: background,
+        foregroundColor: foreground,
         disabledBackgroundColor: AppColors.neutral.withValues(alpha: 0.4),
         disabledForegroundColor: AppColors.onPrimary,
         minimumSize: const Size(88, 44),
         padding: const EdgeInsets.symmetric(horizontal: 28),
         elevation: 0,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        side: isJoined
+            ? const BorderSide(color: AppColors.primary, width: 1.4)
+            : BorderSide.none,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
         textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
       ),
-      child: Text(isFull ? 'Full' : 'Join'),
+      child: Text(label),
     );
   }
 }

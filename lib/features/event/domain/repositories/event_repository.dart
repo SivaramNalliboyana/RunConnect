@@ -11,4 +11,7 @@ abstract class EventRepository {
     required String meetingPoint,
     XFile? image,
   });
+
+  Future<void> joinEvent(String eventId);
+  Future<void> leaveEvent(String eventId);
 }

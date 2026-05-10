@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:runconnect/core/theme/app_colors.dart';
+import 'package:runconnect/features/event/data/data_sources/event_remote_data_source.dart';
+import 'package:runconnect/features/event/data/repositories/event_repository_impl.dart';
+import 'package:runconnect/features/event/domain/use_cases/join_event_use_case.dart';
+import 'package:runconnect/features/event/domain/use_cases/leave_event_use_case.dart';
 import 'package:runconnect/features/feed/data/data_sources/feed_remote_data_source.dart';
 import 'package:runconnect/features/feed/data/repositories/feed_repository_impl.dart';
 import 'package:runconnect/features/feed/domain/use_cases/get_events_use_case.dart';
+import 'package:runconnect/features/feed/domain/use_cases/get_joined_event_ids_use_case.dart';
 import 'package:runconnect/features/feed/presentation/bloc/feed_bloc.dart';
 import 'package:runconnect/features/feed/presentation/bloc/feed_event.dart';
 import 'package:runconnect/features/feed/presentation/bloc/feed_state.dart';
@@ -23,9 +28,16 @@ class FeedPage extends StatelessWidget {
 
   static FeedBloc _buildBloc() {
     final client = Supabase.instance.client;
-    final dataSource = FeedRemoteDataSourceImpl(client);
-    final repository = FeedRepositoryImpl(dataSource);
-    return FeedBloc(getEvents: GetEventsUseCase(repository));
+    final feedRepository = FeedRepositoryImpl(FeedRemoteDataSourceImpl(client));
+    final eventRepository = EventRepositoryImpl(
+      EventRemoteDataSourceImpl(client),
+    );
+    return FeedBloc(
+      getEvents: GetEventsUseCase(feedRepository),
+      getJoinedIds: GetJoinedEventIdsUseCase(feedRepository),
+      joinEvent: JoinEventUseCase(eventRepository),
+      leaveEvent: LeaveEventUseCase(eventRepository),
+    );
   }
 }
 
@@ -117,7 +129,18 @@ class _FeedBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<FeedBloc, FeedState>(
+    return BlocConsumer<FeedBloc, FeedState>(
+      listenWhen: (prev, curr) =>
+          prev.joinErrorMessage != curr.joinErrorMessage &&
+          curr.joinErrorMessage != null,
+      listener: (context, state) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(state.joinErrorMessage!),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      },
       builder: (context, state) {
         switch (state.status) {
           case FeedStatus.initial:
@@ -144,9 +167,19 @@ class _FeedBody extends StatelessWidget {
                 itemCount: state.events.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 14),
                 itemBuilder: (context, index) {
+                  final event = state.events[index];
+                  final isJoined = state.joinedEventIds.contains(event.id);
                   return FeedEventCard(
-                    event: state.events[index],
-                    onJoinPressed: () {},
+                    event: event,
+                    isJoined: isJoined,
+                    onJoinPressed: () {
+                      final bloc = context.read<FeedBloc>();
+                      bloc.add(
+                        isJoined
+                            ? FeedEventLeaveRequested(event.id)
+                            : FeedEventJoinRequested(event.id),
+                      );
+                    },
                   );
                 },
               ),

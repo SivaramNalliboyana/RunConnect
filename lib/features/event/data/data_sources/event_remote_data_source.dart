@@ -14,6 +14,9 @@ abstract class EventRemoteDataSource {
     required String meetingPoint,
     XFile? image,
   });
+
+  Future<void> joinEvent(String eventId);
+  Future<void> leaveEvent(String eventId);
 }
 
 class EventRemoteDataSourceImpl implements EventRemoteDataSource {
@@ -88,6 +91,44 @@ class EventRemoteDataSourceImpl implements EventRemoteDataSource {
         hostName: (meta['name'] as String?) ?? 'Runner',
         hostAvatarUrl: meta['avatar_url'] as String?,
       );
+    } on PostgrestException catch (e) {
+      throw ServerFailure(e.message);
+    }
+  }
+
+  @override
+  Future<void> joinEvent(String eventId) async {
+    final user = _client.auth.currentUser;
+    if (user == null) {
+      throw const ServerFailure('You must be signed in to join an event');
+    }
+
+    try {
+      await _client.from('event_participants').insert({
+        'event_id': eventId,
+        'user_id': user.id,
+      });
+    } on PostgrestException catch (e) {
+      if (e.code == '23505') {
+        throw const ServerFailure('You already joined this event');
+      }
+      throw ServerFailure(e.message);
+    }
+  }
+
+  @override
+  Future<void> leaveEvent(String eventId) async {
+    final user = _client.auth.currentUser;
+    if (user == null) {
+      throw const ServerFailure('You must be signed in to leave an event');
+    }
+
+    try {
+      await _client
+          .from('event_participants')
+          .delete()
+          .eq('event_id', eventId)
+          .eq('user_id', user.id);
     } on PostgrestException catch (e) {
       throw ServerFailure(e.message);
     }

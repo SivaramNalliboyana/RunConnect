@@ -34,4 +34,26 @@ class EventRepositoryImpl implements EventRepository {
       throw ServerFailure(e.toString());
     }
   }
+
+  @override
+  Future<void> joinEvent(String eventId) async {
+    try {
+      await _dataSource.joinEvent(eventId);
+    } on ServerFailure {
+      rethrow;
+    } catch (e) {
+      throw ServerFailure(e.toString());
+    }
+  }
+
+  @override
+  Future<void> leaveEvent(String eventId) async {
+    try {
+      await _dataSource.leaveEvent(eventId);
+    } on ServerFailure {
+      rethrow;
+    } catch (e) {
+      throw ServerFailure(e.toString());
+    }
+  }
 }
