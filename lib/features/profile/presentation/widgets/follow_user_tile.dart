@@ -8,17 +8,21 @@ class FollowUserTile extends StatelessWidget {
     super.key,
     required this.user,
     required this.onTogglePressed,
+    this.onTap,
   });
 
   final ProfileSummary user;
   final VoidCallback onTogglePressed;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          children: [
           _Avatar(url: user.avatarUrl),
           const SizedBox(width: 12),
           Expanded(
@@ -47,12 +51,13 @@ class FollowUserTile extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 8),
-          _FollowButton(
-            isFollowing: user.isFollowing,
-            onPressed: onTogglePressed,
-          ),
-        ],
+            const SizedBox(width: 8),
+            _FollowButton(
+              isFollowing: user.isFollowing,
+              onPressed: onTogglePressed,
+            ),
+          ],
+        ),
       ),
     );
   }

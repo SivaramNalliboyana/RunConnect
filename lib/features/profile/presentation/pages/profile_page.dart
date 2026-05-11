@@ -159,11 +159,17 @@ class _Loaded extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 0, 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    return RefreshIndicator(
+      color: AppColors.primary,
+      onRefresh: () async {
+        context.read<ProfileBloc>().add(ProfileRequested());
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 8, 0, 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: Column(
@@ -177,8 +183,10 @@ class _Loaded extends StatelessWidget {
                 FollowStatsRow(
                   followingCount: profile.followingCount,
                   followersCount: profile.followersCount,
-                  onFollowingTap: () => context.push('/profile/following'),
-                  onFollowersTap: () => context.push('/profile/followers'),
+                  onFollowingTap: () =>
+                      context.push('/user/${profile.id}/following'),
+                  onFollowersTap: () =>
+                      context.push('/user/${profile.id}/followers'),
                 ),
                 if (!isCurrentUser) ...[
                   const SizedBox(height: 16),
@@ -203,7 +211,8 @@ class _Loaded extends StatelessWidget {
               ],
             ),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }

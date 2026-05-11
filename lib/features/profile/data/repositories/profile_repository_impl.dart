@@ -89,12 +89,24 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future<List<ProfileSummary>> getFollowing(String userId) {
-    throw UnimplementedError();
+  Future<List<ProfileSummary>> getFollowing(String userId) async {
+    try {
+      return await _dataSource.getFollowing(userId);
+    } on ServerFailure {
+      rethrow;
+    } catch (e) {
+      throw ServerFailure(e.toString());
+    }
   }
 
   @override
-  Future<List<ProfileSummary>> getFollowers(String userId) {
-    throw UnimplementedError();
+  Future<List<ProfileSummary>> getFollowers(String userId) async {
+    try {
+      return await _dataSource.getFollowers(userId);
+    } on ServerFailure {
+      rethrow;
+    } catch (e) {
+      throw ServerFailure(e.toString());
+    }
   }
 }

@@ -214,12 +214,75 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   }
 
   @override
-  Future<List<ProfileSummary>> getFollowing(String userId) {
-    throw UnimplementedError();
+  Future<List<ProfileSummary>> getFollowing(String userId) async {
+    try {
+      final results = await Future.wait<dynamic>([
+        _client
+            .from('follows')
+            .select('profile:profiles!followee_id(id, name, avatar_url)')
+            .eq('follower_id', userId),
+        _viewerFollowees(),
+      ]);
+
+      final rows = (results[0] as List).cast<Map<String, dynamic>>();
+      final viewerFollowees = results[1] as Set<String>;
+      return _toSummaries(rows, viewerFollowees);
+    } on PostgrestException catch (e) {
+      throw ServerFailure(e.message);
+    }
   }
 
   @override
-  Future<List<ProfileSummary>> getFollowers(String userId) {
-    throw UnimplementedError();
+  Future<List<ProfileSummary>> getFollowers(String userId) async {
+    try {
+      final results = await Future.wait<dynamic>([
+        _client
+            .from('follows')
+            .select('profile:profiles!follower_id(id, name, avatar_url)')
+            .eq('followee_id', userId),
+        _viewerFollowees(),
+      ]);
+
+      final rows = (results[0] as List).cast<Map<String, dynamic>>();
+      final viewerFollowees = results[1] as Set<String>;
+      return _toSummaries(rows, viewerFollowees);
+    } on PostgrestException catch (e) {
+      throw ServerFailure(e.message);
+    }
+  }
+
+  Future<Set<String>> _viewerFollowees() async {
+    final viewerId = _client.auth.currentUser?.id;
+    if (viewerId == null) return <String>{};
+    final rows = await _client
+        .from('follows')
+        .select('followee_id')
+        .eq('follower_id', viewerId);
+    return (rows as List)
+        .map((r) => (r as Map<String, dynamic>)['followee_id'] as String)
+        .toSet();
+  }
+
+  List<ProfileSummary> _toSummaries(
+    List<Map<String, dynamic>> rows,
+    Set<String> viewerFollowees,
+  ) {
+    final viewerId = _client.auth.currentUser?.id;
+    final list = <ProfileSummary>[];
+    for (final row in rows) {
+      final profile = row['profile'] as Map<String, dynamic>?;
+      if (profile == null) continue;
+      final id = profile['id'] as String;
+      if (id == viewerId) continue;
+      list.add(
+        ProfileSummary(
+          id: id,
+          displayName: (profile['name'] as String?) ?? 'Runner',
+          avatarUrl: profile['avatar_url'] as String?,
+          isFollowing: viewerFollowees.contains(id),
+        ),
+      );
+    }
+    return list;
   }
 }

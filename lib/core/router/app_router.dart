@@ -51,16 +51,20 @@ final appRouter = GoRouter(
           ProfilePage(userId: state.pathParameters['userId']),
     ),
     GoRoute(
-      path: '/profile/following',
+      path: '/user/:userId/following',
       parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) =>
-          const FollowListPage(mode: FollowListMode.following),
+      builder: (context, state) => FollowListPage(
+        userId: state.pathParameters['userId']!,
+        mode: FollowListMode.following,
+      ),
     ),
     GoRoute(
-      path: '/profile/followers',
+      path: '/user/:userId/followers',
       parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) =>
-          const FollowListPage(mode: FollowListMode.followers),
+      builder: (context, state) => FollowListPage(
+        userId: state.pathParameters['userId']!,
+        mode: FollowListMode.followers,
+      ),
     ),
     GoRoute(
       path: '/profile/past-activities',
