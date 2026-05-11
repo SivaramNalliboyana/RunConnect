@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:runconnect/core/theme/app_colors.dart';
 import 'package:runconnect/core/theme/app_text_styles.dart';
 import 'package:runconnect/features/event/domain/entities/event.dart';
@@ -88,6 +89,7 @@ class FeedEventCard extends StatelessWidget {
                   left: 12,
                   right: 96,
                   child: _HostOverlay(
+                    hostId: event.hostId,
                     name: event.hostName,
                     avatarUrl: event.hostAvatarUrl,
                   ),
@@ -249,8 +251,13 @@ class _GoingBadge extends StatelessWidget {
 }
 
 class _HostOverlay extends StatelessWidget {
-  const _HostOverlay({required this.name, this.avatarUrl});
+  const _HostOverlay({
+    required this.hostId,
+    required this.name,
+    this.avatarUrl,
+  });
 
+  final String hostId;
   final String name;
   final String? avatarUrl;
 
@@ -262,53 +269,70 @@ class _HostOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: AppColors.surfaceVariant,
-            border: Border.all(color: Colors.white, width: 1.5),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x66000000),
-                blurRadius: 6,
-                offset: Offset(0, 1),
-              ),
-            ],
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: avatarUrl == null || avatarUrl!.isEmpty
-              ? const Icon(Icons.person, size: 18, color: AppColors.textMuted)
-              : Image.network(
-                  avatarUrl!,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const Icon(
-                    Icons.person,
-                    size: 18,
-                    color: AppColors.textMuted,
-                  ),
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => context.push('/user/$hostId'),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          DecoratedBox(
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x66000000),
+                  blurRadius: 6,
+                  offset: Offset(0, 1),
                 ),
-        ),
-        const SizedBox(width: 10),
-        Flexible(
-          child: Text(
-            name,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
-              letterSpacing: 0.2,
-              shadows: _shadow,
+              ],
+            ),
+            child: ClipOval(
+              child: SizedBox(
+                width: 32,
+                height: 32,
+                child: avatarUrl == null || avatarUrl!.isEmpty
+                    ? Container(
+                        color: AppColors.surfaceVariant,
+                        alignment: Alignment.center,
+                        child: const Icon(
+                          Icons.person,
+                          size: 16,
+                          color: AppColors.textMuted,
+                        ),
+                      )
+                    : Image.network(
+                        avatarUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          color: AppColors.surfaceVariant,
+                          alignment: Alignment.center,
+                          child: const Icon(
+                            Icons.person,
+                            size: 16,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ),
+              ),
             ),
           ),
-        ),
-      ],
+          const SizedBox(width: 10),
+          Flexible(
+            child: Text(
+              name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+                letterSpacing: 0.2,
+                shadows: _shadow,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
