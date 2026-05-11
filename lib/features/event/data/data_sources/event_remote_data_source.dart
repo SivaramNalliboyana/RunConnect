@@ -100,6 +100,7 @@ class EventRemoteDataSourceImpl implements EventRemoteDataSource {
         startsAt: DateTime.parse(inserted['starts_at'] as String),
         meetingPoint: inserted['meeting_point'] as String,
         imageUrl: inserted['image_url'] as String?,
+        hostId: user.id,
         hostName: (meta['name'] as String?) ?? 'Runner',
         hostAvatarUrl: meta['avatar_url'] as String?,
       );
@@ -159,6 +160,7 @@ class EventRemoteDataSourceImpl implements EventRemoteDataSource {
         startsAt: DateTime.parse(updated['starts_at'] as String),
         meetingPoint: updated['meeting_point'] as String,
         imageUrl: updated['image_url'] as String?,
+        hostId: updated['host_id'] as String,
         hostName: (host?['name'] as String?) ?? 'Runner',
         hostAvatarUrl: host?['avatar_url'] as String?,
       );

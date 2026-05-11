@@ -155,6 +155,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
                   startsAt: e.startsAt,
                   meetingPoint: e.meetingPoint,
                   imageUrl: e.imageUrl,
+                  hostId: e.hostId,
                   hostName: e.hostName,
                   hostAvatarUrl: e.hostAvatarUrl,
                 )

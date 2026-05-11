@@ -38,6 +38,7 @@ class Event {
   final DateTime startsAt;
   final String meetingPoint;
   final String? imageUrl;
+  final String hostId;
   final String hostName;
   final String? hostAvatarUrl;
 
@@ -49,6 +50,7 @@ class Event {
     required this.paceLevel,
     required this.startsAt,
     required this.meetingPoint,
+    required this.hostId,
     required this.hostName,
     this.currentParticipants = 0,
     this.imageUrl,

@@ -66,6 +66,7 @@ class FeedRemoteDataSourceImpl implements FeedRemoteDataSource {
       startsAt: DateTime.parse(map['starts_at'] as String),
       meetingPoint: map['meeting_point'] as String,
       imageUrl: map['image_url'] as String?,
+      hostId: map['host_id'] as String,
       hostName: (host?['name'] as String?) ?? 'Runner',
       hostAvatarUrl: host?['avatar_url'] as String?,
     );

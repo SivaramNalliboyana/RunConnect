@@ -45,6 +45,12 @@ final appRouter = GoRouter(
       },
     ),
     GoRoute(
+      path: '/user/:userId',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) =>
+          ProfilePage(userId: state.pathParameters['userId']),
+    ),
+    GoRoute(
       path: '/profile/following',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) =>

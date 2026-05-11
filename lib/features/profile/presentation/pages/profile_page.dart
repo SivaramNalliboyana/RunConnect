@@ -9,8 +9,11 @@ import 'package:runconnect/features/profile/data/data_sources/profile_remote_dat
 import 'package:runconnect/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:runconnect/features/profile/domain/entities/profile_event_item.dart';
 import 'package:runconnect/features/profile/domain/entities/user_profile.dart';
+import 'package:runconnect/features/profile/domain/use_cases/follow_user_use_case.dart';
 import 'package:runconnect/features/profile/domain/use_cases/get_my_events_use_case.dart';
 import 'package:runconnect/features/profile/domain/use_cases/get_user_profile_use_case.dart';
+import 'package:runconnect/features/profile/domain/use_cases/is_following_use_case.dart';
+import 'package:runconnect/features/profile/domain/use_cases/unfollow_user_use_case.dart';
 import 'package:runconnect/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:runconnect/features/profile/presentation/bloc/profile_event.dart';
 import 'package:runconnect/features/profile/presentation/bloc/profile_state.dart';
@@ -21,19 +24,32 @@ import 'package:runconnect/features/profile/presentation/widgets/total_km_card.d
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+  const ProfilePage({super.key, this.userId});
+
+  final String? userId;
 
   @override
   Widget build(BuildContext context) {
+    final client = Supabase.instance.client;
+    final currentUserId = client.auth.currentUser?.id ?? '';
+    final targetUserId = userId ?? currentUserId;
+    final isCurrentUser =
+        targetUserId.isNotEmpty && targetUserId == currentUserId;
+
     return BlocProvider(
-      create: (_) => _buildBloc()..add(ProfileRequested()),
-      child: const _ProfileView(),
+      create: (_) =>
+          _buildBloc(targetUserId, currentUserId, isCurrentUser)
+            ..add(ProfileRequested()),
+      child: _ProfileView(isCurrentUser: isCurrentUser),
     );
   }
 
-  static ProfileBloc _buildBloc() {
+  static ProfileBloc _buildBloc(
+    String userId,
+    String currentUserId,
+    bool isCurrentUser,
+  ) {
     final client = Supabase.instance.client;
-    final userId = client.auth.currentUser?.id ?? '';
     final profileRepository = ProfileRepositoryImpl(
       ProfileRemoteDataSourceImpl(client),
     );
@@ -43,14 +59,21 @@ class ProfilePage extends StatelessWidget {
     return ProfileBloc(
       getUserProfile: GetUserProfileUseCase(profileRepository),
       getMyEvents: GetMyEventsUseCase(profileRepository),
+      isFollowing: IsFollowingUseCase(profileRepository),
+      followUser: FollowUserUseCase(profileRepository),
+      unfollowUser: UnfollowUserUseCase(profileRepository),
       deleteEvent: DeleteEventUseCase(eventRepository),
       userId: userId,
+      currentUserId: currentUserId,
+      isCurrentUser: isCurrentUser,
     );
   }
 }
 
 class _ProfileView extends StatelessWidget {
-  const _ProfileView();
+  const _ProfileView({required this.isCurrentUser});
+
+  final bool isCurrentUser;
 
   @override
   Widget build(BuildContext context) {
@@ -60,21 +83,24 @@ class _ProfileView extends StatelessWidget {
         backgroundColor: AppColors.surfaceVariant,
         elevation: 0,
         centerTitle: true,
-        automaticallyImplyLeading: false,
-        title: const Text(
-          'Profile',
-          style: TextStyle(
+        automaticallyImplyLeading: true,
+        iconTheme: const IconThemeData(color: AppColors.primary),
+        title: Text(
+          isCurrentUser ? 'Profile' : 'Runner',
+          style: const TextStyle(
             color: AppColors.primary,
             fontWeight: FontWeight.w700,
             fontSize: 20,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings, color: AppColors.primary),
-            onPressed: () {},
-          ),
-        ],
+        actions: isCurrentUser
+            ? [
+                IconButton(
+                  icon: const Icon(Icons.settings, color: AppColors.primary),
+                  onPressed: () {},
+                ),
+              ]
+            : null,
       ),
       body: SafeArea(
         child: BlocConsumer<ProfileBloc, ProfileState>(
@@ -110,6 +136,7 @@ class _ProfileView extends StatelessWidget {
                 return _Loaded(
                   profile: profile,
                   myEvents: state.myEvents,
+                  isCurrentUser: state.isCurrentUserProfile,
                 );
             }
           },
@@ -120,10 +147,15 @@ class _ProfileView extends StatelessWidget {
 }
 
 class _Loaded extends StatelessWidget {
-  const _Loaded({required this.profile, required this.myEvents});
+  const _Loaded({
+    required this.profile,
+    required this.myEvents,
+    required this.isCurrentUser,
+  });
 
   final UserProfile profile;
   final MyEventsBucket myEvents;
+  final bool isCurrentUser;
 
   @override
   Widget build(BuildContext context) {
@@ -148,6 +180,10 @@ class _Loaded extends StatelessWidget {
                   onFollowingTap: () => context.push('/profile/following'),
                   onFollowersTap: () => context.push('/profile/followers'),
                 ),
+                if (!isCurrentUser) ...[
+                  const SizedBox(height: 16),
+                  const _FollowButton(),
+                ],
                 const SizedBox(height: 20),
                 TotalKmCard(totalKm: profile.totalKmRun),
                 const SizedBox(height: 12),
@@ -161,6 +197,7 @@ class _Loaded extends StatelessWidget {
                   child: _MyEventsSection(
                     upcoming: myEvents.upcoming,
                     past: myEvents.past,
+                    isCurrentUser: isCurrentUser,
                   ),
                 ),
               ],
@@ -173,10 +210,15 @@ class _Loaded extends StatelessWidget {
 }
 
 class _MyEventsSection extends StatelessWidget {
-  const _MyEventsSection({required this.upcoming, required this.past});
+  const _MyEventsSection({
+    required this.upcoming,
+    required this.past,
+    required this.isCurrentUser,
+  });
 
   final List<ProfileEventItem> upcoming;
   final List<ProfileEventItem> past;
+  final bool isCurrentUser;
 
   @override
   Widget build(BuildContext context) {
@@ -185,9 +227,9 @@ class _MyEventsSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'My Events',
-            style: TextStyle(
+          Text(
+            isCurrentUser ? 'My Events' : 'Events',
+            style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
               color: AppColors.onBackground,
@@ -231,8 +273,16 @@ class _MyEventsSection extends StatelessWidget {
             height: 175,
             child: TabBarView(
               children: [
-                _EventList(events: upcoming, isPast: false),
-                _EventList(events: past, isPast: true),
+                _EventList(
+                  events: upcoming,
+                  isPast: false,
+                  showActions: isCurrentUser,
+                ),
+                _EventList(
+                  events: past,
+                  isPast: true,
+                  showActions: isCurrentUser,
+                ),
               ],
             ),
           ),
@@ -243,10 +293,15 @@ class _MyEventsSection extends StatelessWidget {
 }
 
 class _EventList extends StatelessWidget {
-  const _EventList({required this.events, required this.isPast});
+  const _EventList({
+    required this.events,
+    required this.isPast,
+    required this.showActions,
+  });
 
   final List<ProfileEventItem> events;
   final bool isPast;
+  final bool showActions;
 
   @override
   Widget build(BuildContext context) {
@@ -269,17 +324,26 @@ class _EventList extends StatelessWidget {
       separatorBuilder: (_, __) => const SizedBox(width: 12),
       itemBuilder: (_, i) => SizedBox(
         width: 260,
-        child: _ProfileEventCard(event: events[i], isPast: isPast),
+        child: _ProfileEventCard(
+          event: events[i],
+          isPast: isPast,
+          showActions: showActions,
+        ),
       ),
     );
   }
 }
 
 class _ProfileEventCard extends StatelessWidget {
-  const _ProfileEventCard({required this.event, required this.isPast});
+  const _ProfileEventCard({
+    required this.event,
+    required this.isPast,
+    required this.showActions,
+  });
 
   final ProfileEventItem event;
   final bool isPast;
+  final bool showActions;
 
   static const _months = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -325,7 +389,7 @@ class _ProfileEventCard extends StatelessWidget {
                   color: AppColors.primary,
                 ),
               ),
-              if (!isPast && event.isHosting) ...[
+              if (showActions && !isPast && event.isHosting) ...[
                 const SizedBox(width: 4),
                 _EventActionsMenu(event: event),
               ],
@@ -451,6 +515,78 @@ class _StatusBadge extends StatelessWidget {
           color: foreground,
         ),
       ),
+    );
+  }
+}
+
+class _FollowButton extends StatelessWidget {
+  const _FollowButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ProfileBloc, ProfileState>(
+      buildWhen: (prev, curr) =>
+          prev.isFollowing != curr.isFollowing ||
+          prev.isFollowMutating != curr.isFollowMutating,
+      builder: (context, state) {
+        final isFollowing = state.isFollowing;
+        final isMutating = state.isFollowMutating;
+
+        final background = isFollowing
+            ? AppColors.primary.withValues(alpha: 0.12)
+            : AppColors.primary;
+        final foreground = isFollowing
+            ? AppColors.primary
+            : AppColors.onPrimary;
+
+        return Center(
+          child: SizedBox(
+            width: 220,
+            height: 42,
+            child: ElevatedButton(
+              onPressed: isMutating
+                  ? null
+                  : () => context
+                        .read<ProfileBloc>()
+                        .add(FollowToggleRequested()),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: background,
+                foregroundColor: foreground,
+                elevation: 0,
+                side: BorderSide.none,
+                padding: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              child: isMutating
+                  ? SizedBox(
+                      height: 18,
+                      width: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation(foreground),
+                      ),
+                    )
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (isFollowing) ...[
+                          const Icon(Icons.check_rounded, size: 18),
+                          const SizedBox(width: 6),
+                        ],
+                        Text(isFollowing ? 'Following' : 'Follow'),
+                      ],
+                    ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

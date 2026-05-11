@@ -9,12 +9,14 @@ class FollowStatsRow extends StatelessWidget {
     required this.followersCount,
     this.onFollowingTap,
     this.onFollowersTap,
+    this.trailing,
   });
 
   final int followingCount;
   final int followersCount;
   final VoidCallback? onFollowingTap;
   final VoidCallback? onFollowersTap;
+  final Widget? trailing;
 
   static String _format(int n) {
     if (n >= 1000) {
@@ -26,8 +28,8 @@ class FollowStatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    final stats = Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         _Stat(
           value: _format(followingCount),
@@ -37,7 +39,7 @@ class FollowStatsRow extends StatelessWidget {
         Container(
           width: 1,
           height: 32,
-          margin: const EdgeInsets.symmetric(horizontal: 32),
+          margin: const EdgeInsets.symmetric(horizontal: 20),
           color: Colors.black12,
         ),
         _Stat(
@@ -45,6 +47,22 @@ class FollowStatsRow extends StatelessWidget {
           label: 'Followers',
           onTap: onFollowersTap,
         ),
+      ],
+    );
+
+    if (trailing == null) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [stats],
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        trailing!,
+        const SizedBox(width: 16),
+        stats,
       ],
     );
   }

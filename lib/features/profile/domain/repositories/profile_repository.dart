@@ -8,6 +8,21 @@ abstract class ProfileRepository {
 
   Future<MyEventsBucket> getMyEvents(String userId);
 
+  Future<bool> isFollowing({
+    required String followerId,
+    required String followeeId,
+  });
+
+  Future<void> followUser({
+    required String followerId,
+    required String followeeId,
+  });
+
+  Future<void> unfollowUser({
+    required String followerId,
+    required String followeeId,
+  });
+
   Future<List<PastActivity>> getPastActivities(String userId);
 
   Future<List<ProfileSummary>> getFollowing(String userId);

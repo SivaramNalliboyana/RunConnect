@@ -11,6 +11,21 @@ abstract class ProfileRemoteDataSource {
 
   Future<MyEventsBucket> getMyEvents(String userId);
 
+  Future<bool> isFollowing({
+    required String followerId,
+    required String followeeId,
+  });
+
+  Future<void> followUser({
+    required String followerId,
+    required String followeeId,
+  });
+
+  Future<void> unfollowUser({
+    required String followerId,
+    required String followeeId,
+  });
+
   Future<List<PastActivity>> getPastActivities(String userId);
 
   Future<List<ProfileSummary>> getFollowing(String userId);
@@ -39,18 +54,28 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
             .from('event_participants')
             .count(CountOption.exact)
             .eq('user_id', userId),
+        _client
+            .from('follows')
+            .count(CountOption.exact)
+            .eq('follower_id', userId),
+        _client
+            .from('follows')
+            .count(CountOption.exact)
+            .eq('followee_id', userId),
       ]);
 
       final profile = results[0] as Map<String, dynamic>;
       final eventsOrganized = results[1] as int;
       final eventsJoined = results[2] as int;
+      final followingCount = results[3] as int;
+      final followersCount = results[4] as int;
 
       return UserProfile(
         id: profile['id'] as String,
         displayName: (profile['name'] as String?) ?? 'Runner',
         avatarUrl: profile['avatar_url'] as String?,
-        followingCount: 0,
-        followersCount: 0,
+        followingCount: followingCount,
+        followersCount: followersCount,
         totalKmRun: 0,
         eventsJoined: eventsJoined,
         eventsOrganized: eventsOrganized,
@@ -131,6 +156,56 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       imageUrl: row['image_url'] as String?,
       isHosting: (row['host_id'] as String?) == userId,
     );
+  }
+
+  @override
+  Future<bool> isFollowing({
+    required String followerId,
+    required String followeeId,
+  }) async {
+    try {
+      final row = await _client
+          .from('follows')
+          .select('follower_id')
+          .eq('follower_id', followerId)
+          .eq('followee_id', followeeId)
+          .maybeSingle();
+      return row != null;
+    } on PostgrestException catch (e) {
+      throw ServerFailure(e.message);
+    }
+  }
+
+  @override
+  Future<void> followUser({
+    required String followerId,
+    required String followeeId,
+  }) async {
+    try {
+      await _client.from('follows').insert({
+        'follower_id': followerId,
+        'followee_id': followeeId,
+      });
+    } on PostgrestException catch (e) {
+      if (e.code == '23505') return;
+      throw ServerFailure(e.message);
+    }
+  }
+
+  @override
+  Future<void> unfollowUser({
+    required String followerId,
+    required String followeeId,
+  }) async {
+    try {
+      await _client
+          .from('follows')
+          .delete()
+          .eq('follower_id', followerId)
+          .eq('followee_id', followeeId);
+    } on PostgrestException catch (e) {
+      throw ServerFailure(e.message);
+    }
   }
 
   @override

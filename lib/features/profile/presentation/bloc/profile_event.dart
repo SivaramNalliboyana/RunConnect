@@ -6,3 +6,5 @@ class MyEventDeleteRequested extends ProfileEvent {
   final String eventId;
   MyEventDeleteRequested(this.eventId);
 }
+
+class FollowToggleRequested extends ProfileEvent {}

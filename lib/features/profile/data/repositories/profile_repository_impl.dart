@@ -33,6 +33,57 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
+  Future<bool> isFollowing({
+    required String followerId,
+    required String followeeId,
+  }) async {
+    try {
+      return await _dataSource.isFollowing(
+        followerId: followerId,
+        followeeId: followeeId,
+      );
+    } on ServerFailure {
+      rethrow;
+    } catch (e) {
+      throw ServerFailure(e.toString());
+    }
+  }
+
+  @override
+  Future<void> followUser({
+    required String followerId,
+    required String followeeId,
+  }) async {
+    try {
+      await _dataSource.followUser(
+        followerId: followerId,
+        followeeId: followeeId,
+      );
+    } on ServerFailure {
+      rethrow;
+    } catch (e) {
+      throw ServerFailure(e.toString());
+    }
+  }
+
+  @override
+  Future<void> unfollowUser({
+    required String followerId,
+    required String followeeId,
+  }) async {
+    try {
+      await _dataSource.unfollowUser(
+        followerId: followerId,
+        followeeId: followeeId,
+      );
+    } on ServerFailure {
+      rethrow;
+    } catch (e) {
+      throw ServerFailure(e.toString());
+    }
+  }
+
+  @override
   Future<List<PastActivity>> getPastActivities(String userId) {
     throw UnimplementedError();
   }
