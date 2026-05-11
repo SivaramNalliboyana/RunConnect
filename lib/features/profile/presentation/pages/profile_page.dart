@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:runconnect/core/theme/app_colors.dart';
 import 'package:runconnect/features/profile/data/data_sources/profile_remote_data_source.dart';
 import 'package:runconnect/features/profile/data/repositories/profile_repository_impl.dart';
+import 'package:runconnect/features/profile/domain/entities/profile_event_item.dart';
 import 'package:runconnect/features/profile/domain/entities/user_profile.dart';
+import 'package:runconnect/features/profile/domain/use_cases/get_my_events_use_case.dart';
 import 'package:runconnect/features/profile/domain/use_cases/get_user_profile_use_case.dart';
 import 'package:runconnect/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:runconnect/features/profile/presentation/bloc/profile_event.dart';
@@ -18,64 +20,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
-  static final _mockUpcomingEvents = <_ProfileEventMock>[
-    _ProfileEventMock(
-      id: 'u1',
-      title: 'Sunrise Beach Run',
-      startsAt: DateTime(2026, 5, 14, 6, 30),
-      distanceKm: 6.0,
-      meetingPoint: 'Marine Drive',
-      isHosting: true,
-    ),
-    _ProfileEventMock(
-      id: 'u2',
-      title: 'Weekend Trail Long Run',
-      startsAt: DateTime(2026, 5, 17, 7, 0),
-      distanceKm: 12.0,
-      meetingPoint: 'Sanjay Gandhi Park',
-    ),
-    _ProfileEventMock(
-      id: 'u3',
-      title: 'Tuesday Tempo',
-      startsAt: DateTime(2026, 5, 19, 18, 30),
-      distanceKm: 8.0,
-      meetingPoint: 'BKC Promenade',
-    ),
-  ];
-
-  static final _mockPastEvents = <_ProfileEventMock>[
-    _ProfileEventMock(
-      id: 'p1',
-      title: 'City Marathon Prep',
-      startsAt: DateTime(2026, 4, 20, 6, 0),
-      distanceKm: 15.0,
-      meetingPoint: 'Bandra Reclamation',
-    ),
-    _ProfileEventMock(
-      id: 'p2',
-      title: 'Evening 5K Social',
-      startsAt: DateTime(2026, 4, 12, 18, 30),
-      distanceKm: 5.0,
-      meetingPoint: 'Powai Lake',
-      isHosting: true,
-    ),
-    _ProfileEventMock(
-      id: 'p3',
-      title: 'Sunday Hill Repeats',
-      startsAt: DateTime(2026, 4, 5, 6, 45),
-      distanceKm: 9.0,
-      meetingPoint: 'Pali Hill',
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => _buildBloc()..add(ProfileRequested()),
-      child: _ProfileView(
-        upcomingEvents: _mockUpcomingEvents,
-        pastEvents: _mockPastEvents,
-      ),
+      child: const _ProfileView(),
     );
   }
 
@@ -87,19 +36,14 @@ class ProfilePage extends StatelessWidget {
     );
     return ProfileBloc(
       getUserProfile: GetUserProfileUseCase(repository),
+      getMyEvents: GetMyEventsUseCase(repository),
       userId: userId,
     );
   }
 }
 
 class _ProfileView extends StatelessWidget {
-  const _ProfileView({
-    required this.upcomingEvents,
-    required this.pastEvents,
-  });
-
-  final List<_ProfileEventMock> upcomingEvents;
-  final List<_ProfileEventMock> pastEvents;
+  const _ProfileView();
 
   @override
   Widget build(BuildContext context) {
@@ -147,8 +91,7 @@ class _ProfileView extends StatelessWidget {
                 }
                 return _Loaded(
                   profile: profile,
-                  upcomingEvents: upcomingEvents,
-                  pastEvents: pastEvents,
+                  myEvents: state.myEvents,
                 );
             }
           },
@@ -159,15 +102,10 @@ class _ProfileView extends StatelessWidget {
 }
 
 class _Loaded extends StatelessWidget {
-  const _Loaded({
-    required this.profile,
-    required this.upcomingEvents,
-    required this.pastEvents,
-  });
+  const _Loaded({required this.profile, required this.myEvents});
 
   final UserProfile profile;
-  final List<_ProfileEventMock> upcomingEvents;
-  final List<_ProfileEventMock> pastEvents;
+  final MyEventsBucket myEvents;
 
   @override
   Widget build(BuildContext context) {
@@ -203,8 +141,8 @@ class _Loaded extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(right: 0),
                   child: _MyEventsSection(
-                    upcoming: upcomingEvents,
-                    past: pastEvents,
+                    upcoming: myEvents.upcoming,
+                    past: myEvents.past,
                   ),
                 ),
               ],
@@ -216,29 +154,11 @@ class _Loaded extends StatelessWidget {
   }
 }
 
-class _ProfileEventMock {
-  const _ProfileEventMock({
-    required this.id,
-    required this.title,
-    required this.startsAt,
-    required this.distanceKm,
-    required this.meetingPoint,
-    this.isHosting = false,
-  });
-
-  final String id;
-  final String title;
-  final DateTime startsAt;
-  final double distanceKm;
-  final String meetingPoint;
-  final bool isHosting;
-}
-
 class _MyEventsSection extends StatelessWidget {
   const _MyEventsSection({required this.upcoming, required this.past});
 
-  final List<_ProfileEventMock> upcoming;
-  final List<_ProfileEventMock> past;
+  final List<ProfileEventItem> upcoming;
+  final List<ProfileEventItem> past;
 
   @override
   Widget build(BuildContext context) {
@@ -307,7 +227,7 @@ class _MyEventsSection extends StatelessWidget {
 class _EventList extends StatelessWidget {
   const _EventList({required this.events, required this.isPast});
 
-  final List<_ProfileEventMock> events;
+  final List<ProfileEventItem> events;
   final bool isPast;
 
   @override
@@ -340,7 +260,7 @@ class _EventList extends StatelessWidget {
 class _ProfileEventCard extends StatelessWidget {
   const _ProfileEventCard({required this.event, required this.isPast});
 
-  final _ProfileEventMock event;
+  final ProfileEventItem event;
   final bool isPast;
 
   static const _months = [
