@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:runconnect/core/theme/app_colors.dart';
+import 'package:runconnect/features/event/data/data_sources/event_remote_data_source.dart';
+import 'package:runconnect/features/event/data/repositories/event_repository_impl.dart';
+import 'package:runconnect/features/event/domain/use_cases/delete_event_use_case.dart';
 import 'package:runconnect/features/profile/data/data_sources/profile_remote_data_source.dart';
 import 'package:runconnect/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:runconnect/features/profile/domain/entities/profile_event_item.dart';
@@ -31,12 +34,16 @@ class ProfilePage extends StatelessWidget {
   static ProfileBloc _buildBloc() {
     final client = Supabase.instance.client;
     final userId = client.auth.currentUser?.id ?? '';
-    final repository = ProfileRepositoryImpl(
+    final profileRepository = ProfileRepositoryImpl(
       ProfileRemoteDataSourceImpl(client),
     );
+    final eventRepository = EventRepositoryImpl(
+      EventRemoteDataSourceImpl(client),
+    );
     return ProfileBloc(
-      getUserProfile: GetUserProfileUseCase(repository),
-      getMyEvents: GetMyEventsUseCase(repository),
+      getUserProfile: GetUserProfileUseCase(profileRepository),
+      getMyEvents: GetMyEventsUseCase(profileRepository),
+      deleteEvent: DeleteEventUseCase(eventRepository),
       userId: userId,
     );
   }
@@ -70,7 +77,18 @@ class _ProfileView extends StatelessWidget {
         ],
       ),
       body: SafeArea(
-        child: BlocBuilder<ProfileBloc, ProfileState>(
+        child: BlocConsumer<ProfileBloc, ProfileState>(
+          listenWhen: (prev, curr) =>
+              prev.actionErrorMessage != curr.actionErrorMessage &&
+              curr.actionErrorMessage != null,
+          listener: (context, state) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.actionErrorMessage!),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          },
           builder: (context, state) {
             switch (state.status) {
               case ProfileStatus.initial:
@@ -210,7 +228,7 @@ class _MyEventsSection extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           SizedBox(
-            height: 150,
+            height: 175,
             child: TabBarView(
               children: [
                 _EventList(events: upcoming, isPast: false),
@@ -307,6 +325,10 @@ class _ProfileEventCard extends StatelessWidget {
                   color: AppColors.primary,
                 ),
               ),
+              if (!isPast && event.isHosting) ...[
+                const SizedBox(width: 4),
+                _EventActionsMenu(event: event),
+              ],
             ],
           ),
           const SizedBox(height: 8),
@@ -366,6 +388,27 @@ class _ProfileEventCard extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              const Icon(
+                Icons.people_outline,
+                size: 13,
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                isPast
+                    ? '${event.currentParticipants} attended'
+                    : '${event.currentParticipants}/${event.maxParticipants} going',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textMuted,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -409,6 +452,92 @@ class _StatusBadge extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+enum _EventAction { edit, delete }
+
+class _EventActionsMenu extends StatelessWidget {
+  const _EventActionsMenu({required this.event});
+
+  final ProfileEventItem event;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 28,
+      height: 28,
+      child: PopupMenuButton<_EventAction>(
+        tooltip: 'Event actions',
+        padding: EdgeInsets.zero,
+        icon: const Icon(
+          Icons.more_vert,
+          size: 18,
+          color: AppColors.textMuted,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        onSelected: (action) => _handle(context, action),
+        itemBuilder: (_) => const [
+          PopupMenuItem(
+            value: _EventAction.edit,
+            child: Row(
+              children: [
+                Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
+                SizedBox(width: 10),
+                Text('Edit'),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: _EventAction.delete,
+            child: Row(
+              children: [
+                Icon(Icons.delete_outline, size: 18, color: AppColors.error),
+                SizedBox(width: 10),
+                Text('Delete', style: TextStyle(color: AppColors.error)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handle(BuildContext context, _EventAction action) async {
+    final bloc = context.read<ProfileBloc>();
+    switch (action) {
+      case _EventAction.edit:
+        final saved = await context.push<bool>('/edit-event', extra: event);
+        if (saved == true) {
+          bloc.add(ProfileRequested());
+        }
+      case _EventAction.delete:
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Delete event?'),
+            content: Text(
+              '“${event.title}” will be removed for everyone who joined.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                style: TextButton.styleFrom(foregroundColor: AppColors.error),
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Delete'),
+              ),
+            ],
+          ),
+        );
+        if (confirmed == true) {
+          bloc.add(MyEventDeleteRequested(event.id));
+        }
+    }
   }
 }
 

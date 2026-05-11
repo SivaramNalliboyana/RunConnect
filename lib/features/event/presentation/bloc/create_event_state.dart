@@ -6,14 +6,14 @@ class CreateEventState {
   final PaceLevel? paceLevel;
   final bool isSubmitting;
   final String? errorMessage;
-  final Event? createdEvent;
+  final Event? savedEvent;
 
   const CreateEventState({
     this.image,
     this.paceLevel,
     this.isSubmitting = false,
     this.errorMessage,
-    this.createdEvent,
+    this.savedEvent,
   });
 
   const CreateEventState.initial() : this();
@@ -25,14 +25,14 @@ class CreateEventState {
     PaceLevel? paceLevel,
     bool? isSubmitting,
     String? errorMessage,
-    Event? createdEvent,
+    Event? savedEvent,
   }) {
     return CreateEventState(
       image: image ?? this.image,
       paceLevel: paceLevel ?? this.paceLevel,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       errorMessage: errorMessage,
-      createdEvent: createdEvent ?? this.createdEvent,
+      savedEvent: savedEvent ?? this.savedEvent,
     );
   }
 }

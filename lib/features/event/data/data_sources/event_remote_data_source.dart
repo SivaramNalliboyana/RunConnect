@@ -15,6 +15,18 @@ abstract class EventRemoteDataSource {
     XFile? image,
   });
 
+  Future<Event> updateEvent({
+    required String eventId,
+    required String title,
+    required double distanceKm,
+    required int maxParticipants,
+    required PaceLevel paceLevel,
+    required DateTime startsAt,
+    required String meetingPoint,
+  });
+
+  Future<void> deleteEvent(String eventId);
+
   Future<void> joinEvent(String eventId);
   Future<void> leaveEvent(String eventId);
 }
@@ -91,6 +103,83 @@ class EventRemoteDataSourceImpl implements EventRemoteDataSource {
         hostName: (meta['name'] as String?) ?? 'Runner',
         hostAvatarUrl: meta['avatar_url'] as String?,
       );
+    } on PostgrestException catch (e) {
+      throw ServerFailure(e.message);
+    }
+  }
+
+  @override
+  Future<Event> updateEvent({
+    required String eventId,
+    required String title,
+    required double distanceKm,
+    required int maxParticipants,
+    required PaceLevel paceLevel,
+    required DateTime startsAt,
+    required String meetingPoint,
+  }) async {
+    final user = _client.auth.currentUser;
+    if (user == null) {
+      throw const ServerFailure('You must be signed in to edit an event');
+    }
+
+    try {
+      final updated = await _client
+          .from(_table)
+          .update({
+            'title': title,
+            'distance_km': distanceKm,
+            'max_participants': maxParticipants,
+            'pace_level': paceLevel.name,
+            'starts_at': startsAt.toUtc().toIso8601String(),
+            'meeting_point': meetingPoint,
+          })
+          .eq('id', eventId)
+          .eq('host_id', user.id)
+          .select(
+            '*, host:profiles!host_id(name, avatar_url),'
+            ' participants:event_participants(count)',
+          )
+          .single();
+
+      final host = updated['host'] as Map<String, dynamic>?;
+      final participants = updated['participants'] as List?;
+      final currentParticipants =
+          (participants != null && participants.isNotEmpty)
+          ? (participants.first['count'] as int? ?? 0)
+          : 0;
+
+      return Event(
+        id: updated['id'] as String,
+        title: updated['title'] as String,
+        distanceKm: (updated['distance_km'] as num).toDouble(),
+        maxParticipants: updated['max_participants'] as int,
+        currentParticipants: currentParticipants,
+        paceLevel: PaceLevel.values.byName(updated['pace_level'] as String),
+        startsAt: DateTime.parse(updated['starts_at'] as String),
+        meetingPoint: updated['meeting_point'] as String,
+        imageUrl: updated['image_url'] as String?,
+        hostName: (host?['name'] as String?) ?? 'Runner',
+        hostAvatarUrl: host?['avatar_url'] as String?,
+      );
+    } on PostgrestException catch (e) {
+      throw ServerFailure(e.message);
+    }
+  }
+
+  @override
+  Future<void> deleteEvent(String eventId) async {
+    final user = _client.auth.currentUser;
+    if (user == null) {
+      throw const ServerFailure('You must be signed in to delete an event');
+    }
+
+    try {
+      await _client
+          .from(_table)
+          .delete()
+          .eq('id', eventId)
+          .eq('host_id', user.id);
     } on PostgrestException catch (e) {
       throw ServerFailure(e.message);
     }

@@ -1,4 +1,5 @@
 import 'package:runconnect/core/error/failures.dart';
+import 'package:runconnect/features/event/domain/entities/event.dart';
 import 'package:runconnect/features/profile/domain/entities/past_activity.dart';
 import 'package:runconnect/features/profile/domain/entities/profile_event_item.dart';
 import 'package:runconnect/features/profile/domain/entities/profile_summary.dart';
@@ -62,17 +63,15 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   @override
   Future<MyEventsBucket> getMyEvents(String userId) async {
     try {
+      const eventColumns =
+          'id, title, distance_km, max_participants, pace_level, starts_at, '
+          'meeting_point, image_url, host_id, '
+          'participants:event_participants(count)';
       final results = await Future.wait<dynamic>([
-        _client
-            .from('events')
-            .select('id, title, distance_km, starts_at, meeting_point, host_id')
-            .eq('host_id', userId),
+        _client.from('events').select(eventColumns).eq('host_id', userId),
         _client
             .from('event_participants')
-            .select(
-              'event:events!inner('
-              'id, title, distance_km, starts_at, meeting_point, host_id)',
-            )
+            .select('event:events!inner($eventColumns)')
             .eq('user_id', userId),
       ]);
 
@@ -114,12 +113,22 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   }
 
   ProfileEventItem _mapEvent(Map<String, dynamic> row, String userId) {
+    final participants = row['participants'] as List?;
+    final currentParticipants =
+        (participants != null && participants.isNotEmpty)
+        ? (participants.first['count'] as int? ?? 0)
+        : 0;
+
     return ProfileEventItem(
       id: row['id'] as String,
       title: row['title'] as String,
       startsAt: DateTime.parse(row['starts_at'] as String).toLocal(),
       distanceKm: (row['distance_km'] as num).toDouble(),
+      maxParticipants: row['max_participants'] as int,
+      currentParticipants: currentParticipants,
+      paceLevel: PaceLevel.values.byName(row['pace_level'] as String),
       meetingPoint: row['meeting_point'] as String,
+      imageUrl: row['image_url'] as String?,
       isHosting: (row['host_id'] as String?) == userId,
     );
   }

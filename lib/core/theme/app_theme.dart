@@ -44,4 +44,15 @@ final appTheme = ThemeData(
     hintStyle: const TextStyle(color: AppColors.textMuted),
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
   ),
+  snackBarTheme: SnackBarThemeData(
+    backgroundColor: AppColors.primary,
+    contentTextStyle: const TextStyle(
+      color: AppColors.onPrimary,
+      fontWeight: FontWeight.w500,
+    ),
+    actionTextColor: AppColors.onPrimary,
+    behavior: SnackBarBehavior.floating,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    elevation: 4,
+  ),
 );

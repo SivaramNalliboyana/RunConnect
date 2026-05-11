@@ -36,6 +36,44 @@ class EventRepositoryImpl implements EventRepository {
   }
 
   @override
+  Future<Event> updateEvent({
+    required String eventId,
+    required String title,
+    required double distanceKm,
+    required int maxParticipants,
+    required PaceLevel paceLevel,
+    required DateTime startsAt,
+    required String meetingPoint,
+  }) async {
+    try {
+      return await _dataSource.updateEvent(
+        eventId: eventId,
+        title: title,
+        distanceKm: distanceKm,
+        maxParticipants: maxParticipants,
+        paceLevel: paceLevel,
+        startsAt: startsAt,
+        meetingPoint: meetingPoint,
+      );
+    } on ServerFailure {
+      rethrow;
+    } catch (e) {
+      throw ServerFailure(e.toString());
+    }
+  }
+
+  @override
+  Future<void> deleteEvent(String eventId) async {
+    try {
+      await _dataSource.deleteEvent(eventId);
+    } on ServerFailure {
+      rethrow;
+    } catch (e) {
+      throw ServerFailure(e.toString());
+    }
+  }
+
+  @override
   Future<void> joinEvent(String eventId) async {
     try {
       await _dataSource.joinEvent(eventId);

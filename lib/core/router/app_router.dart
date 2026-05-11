@@ -8,6 +8,7 @@ import 'package:runconnect/features/board/presentation/pages/board_page.dart';
 import 'package:runconnect/features/event/presentation/pages/create_event_page.dart';
 import 'package:runconnect/features/feed/presentation/pages/feed_page.dart';
 import 'package:runconnect/features/map/presentation/pages/map_page.dart';
+import 'package:runconnect/features/profile/domain/entities/profile_event_item.dart';
 import 'package:runconnect/features/profile/presentation/pages/follow_list_page.dart';
 import 'package:runconnect/features/profile/presentation/pages/past_activities_page.dart';
 import 'package:runconnect/features/profile/presentation/pages/profile_page.dart';
@@ -34,6 +35,14 @@ final appRouter = GoRouter(
       path: '/create-event',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const CreateEventPage(),
+    ),
+    GoRoute(
+      path: '/edit-event',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final event = state.extra as ProfileEventItem?;
+        return CreateEventPage(eventToEdit: event);
+      },
     ),
     GoRoute(
       path: '/profile/following',

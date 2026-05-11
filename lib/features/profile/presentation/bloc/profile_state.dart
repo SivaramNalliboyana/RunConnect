@@ -8,12 +8,14 @@ class ProfileState {
   final UserProfile? profile;
   final MyEventsBucket myEvents;
   final String? errorMessage;
+  final String? actionErrorMessage;
 
   const ProfileState({
     this.status = ProfileStatus.initial,
     this.profile,
     this.myEvents = const MyEventsBucket.empty(),
     this.errorMessage,
+    this.actionErrorMessage,
   });
 
   const ProfileState.initial() : this();
@@ -23,12 +25,14 @@ class ProfileState {
     UserProfile? profile,
     MyEventsBucket? myEvents,
     String? errorMessage,
+    String? actionErrorMessage,
   }) {
     return ProfileState(
       status: status ?? this.status,
       profile: profile ?? this.profile,
       myEvents: myEvents ?? this.myEvents,
       errorMessage: errorMessage,
+      actionErrorMessage: actionErrorMessage,
     );
   }
 }

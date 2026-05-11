@@ -6,6 +6,7 @@ import 'package:runconnect/core/theme/app_colors.dart';
 import 'package:runconnect/features/event/data/data_sources/event_remote_data_source.dart';
 import 'package:runconnect/features/event/data/repositories/event_repository_impl.dart';
 import 'package:runconnect/features/event/domain/use_cases/create_event_use_case.dart';
+import 'package:runconnect/features/event/domain/use_cases/update_event_use_case.dart';
 import 'package:runconnect/features/event/presentation/bloc/create_event_bloc.dart';
 import 'package:runconnect/features/event/presentation/bloc/create_event_event.dart';
 import 'package:runconnect/features/event/presentation/bloc/create_event_state.dart';
@@ -13,43 +14,80 @@ import 'package:runconnect/features/event/presentation/widgets/date_time_section
 import 'package:runconnect/features/event/presentation/widgets/labeled_field.dart';
 import 'package:runconnect/features/event/presentation/widgets/pace_level_selector.dart';
 import 'package:runconnect/features/event/presentation/widgets/run_image_banner.dart';
+import 'package:runconnect/features/profile/domain/entities/profile_event_item.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CreateEventPage extends StatelessWidget {
-  const CreateEventPage({super.key});
+  const CreateEventPage({super.key, this.eventToEdit});
+
+  final ProfileEventItem? eventToEdit;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => _buildBloc(),
-      child: const _CreateEventView(),
+      create: (_) => _buildBloc(eventToEdit),
+      child: _CreateEventView(eventToEdit: eventToEdit),
     );
   }
 
-  static CreateEventBloc _buildBloc() {
+  static CreateEventBloc _buildBloc(ProfileEventItem? eventToEdit) {
     final client = Supabase.instance.client;
     final dataSource = EventRemoteDataSourceImpl(client);
     final repository = EventRepositoryImpl(dataSource);
-    return CreateEventBloc(createEvent: CreateEventUseCase(repository));
+    final bloc = CreateEventBloc(
+      createEvent: CreateEventUseCase(repository),
+      updateEvent: UpdateEventUseCase(repository),
+    );
+    if (eventToEdit != null) {
+      bloc.add(CreateEventPaceLevelSelected(eventToEdit.paceLevel));
+    }
+    return bloc;
   }
 }
 
 class _CreateEventView extends StatefulWidget {
-  const _CreateEventView();
+  const _CreateEventView({this.eventToEdit});
+
+  final ProfileEventItem? eventToEdit;
 
   @override
   State<_CreateEventView> createState() => _CreateEventViewState();
 }
 
 class _CreateEventViewState extends State<_CreateEventView> {
-  final _title = TextEditingController();
-  final _distance = TextEditingController();
-  final _maxParticipants = TextEditingController();
-  final _meetingPoint = TextEditingController();
+  late final TextEditingController _title;
+  late final TextEditingController _distance;
+  late final TextEditingController _maxParticipants;
+  late final TextEditingController _meetingPoint;
   final _picker = ImagePicker();
 
   DateTime? _date;
   TimeOfDay? _time;
+
+  bool get _isEditing => widget.eventToEdit != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final e = widget.eventToEdit;
+    _title = TextEditingController(text: e?.title ?? '');
+    _distance = TextEditingController(
+      text: e == null ? '' : _formatDistance(e.distanceKm),
+    );
+    _maxParticipants = TextEditingController(
+      text: e == null ? '' : e.maxParticipants.toString(),
+    );
+    _meetingPoint = TextEditingController(text: e?.meetingPoint ?? '');
+    if (e != null) {
+      _date = DateTime(e.startsAt.year, e.startsAt.month, e.startsAt.day);
+      _time = TimeOfDay(hour: e.startsAt.hour, minute: e.startsAt.minute);
+    }
+  }
+
+  String _formatDistance(double km) {
+    if (km == km.truncateToDouble()) return km.toStringAsFixed(0);
+    return km.toString();
+  }
 
   @override
   void dispose() {
@@ -68,9 +106,10 @@ class _CreateEventViewState extends State<_CreateEventView> {
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
+    final initial = _date ?? now;
     final picked = await showDatePicker(
       context: context,
-      initialDate: _date ?? now,
+      initialDate: initial.isBefore(now) ? now : initial,
       firstDate: now,
       lastDate: now.add(const Duration(days: 365)),
     );
@@ -110,15 +149,30 @@ class _CreateEventViewState extends State<_CreateEventView> {
       _time!.minute,
     );
 
-    bloc.add(
-      CreateEventSubmitted(
-        title: _title.text.trim(),
-        distanceKm: double.tryParse(_distance.text) ?? 0,
-        maxParticipants: int.tryParse(_maxParticipants.text) ?? 0,
-        startsAt: startsAt,
-        meetingPoint: _meetingPoint.text.trim(),
-      ),
-    );
+    final editing = widget.eventToEdit;
+    if (editing != null) {
+      bloc.add(
+        UpdateEventSubmitted(
+          eventId: editing.id,
+          title: _title.text.trim(),
+          distanceKm: double.tryParse(_distance.text) ?? 0,
+          maxParticipants: int.tryParse(_maxParticipants.text) ?? 0,
+          paceLevel: state.paceLevel!,
+          startsAt: startsAt,
+          meetingPoint: _meetingPoint.text.trim(),
+        ),
+      );
+    } else {
+      bloc.add(
+        CreateEventSubmitted(
+          title: _title.text.trim(),
+          distanceKm: double.tryParse(_distance.text) ?? 0,
+          maxParticipants: int.tryParse(_maxParticipants.text) ?? 0,
+          startsAt: startsAt,
+          meetingPoint: _meetingPoint.text.trim(),
+        ),
+      );
+    }
   }
 
   void _snack(String message) {
@@ -129,10 +183,11 @@ class _CreateEventViewState extends State<_CreateEventView> {
 
   @override
   Widget build(BuildContext context) {
+    final editing = widget.eventToEdit;
     return BlocConsumer<CreateEventBloc, CreateEventState>(
       listenWhen: (prev, curr) =>
           prev.errorMessage != curr.errorMessage ||
-          prev.createdEvent != curr.createdEvent,
+          prev.savedEvent != curr.savedEvent,
       listener: (context, state) {
         if (state.errorMessage != null) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -142,11 +197,13 @@ class _CreateEventViewState extends State<_CreateEventView> {
             ),
           );
         }
-        if (state.createdEvent != null) {
+        if (state.savedEvent != null) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Event created')),
+            SnackBar(
+              content: Text(_isEditing ? 'Event updated' : 'Event created'),
+            ),
           );
-          context.pop();
+          context.pop(true);
         }
       },
       builder: (context, state) {
@@ -154,7 +211,7 @@ class _CreateEventViewState extends State<_CreateEventView> {
         return Scaffold(
           backgroundColor: AppColors.surfaceVariant,
           appBar: AppBar(
-            title: const Text('Create Run'),
+            title: Text(_isEditing ? 'Edit Run' : 'Create Run'),
             backgroundColor: AppColors.surfaceVariant,
             foregroundColor: AppColors.onBackground,
             elevation: 0,
@@ -170,7 +227,9 @@ class _CreateEventViewState extends State<_CreateEventView> {
                       children: [
                         RunImageBanner(
                           imagePath: state.imagePath,
-                          onTap: _pickImage,
+                          imageUrl: editing?.imageUrl,
+                          onTap: _isEditing ? null : _pickImage,
+                          showEditIcon: !_isEditing,
                         ),
                         const SizedBox(height: 20),
                         LabeledField(
@@ -211,8 +270,9 @@ class _CreateEventViewState extends State<_CreateEventView> {
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-                  child: _CreateEventButton(
+                  child: _SubmitButton(
                     isSubmitting: state.isSubmitting,
+                    isEditing: _isEditing,
                     onPressed: state.isSubmitting ? null : _submit,
                   ),
                 ),
@@ -225,13 +285,15 @@ class _CreateEventViewState extends State<_CreateEventView> {
   }
 }
 
-class _CreateEventButton extends StatelessWidget {
-  const _CreateEventButton({
+class _SubmitButton extends StatelessWidget {
+  const _SubmitButton({
     required this.isSubmitting,
+    required this.isEditing,
     required this.onPressed,
   });
 
   final bool isSubmitting;
+  final bool isEditing;
   final VoidCallback? onPressed;
 
   @override
@@ -260,16 +322,16 @@ class _CreateEventButton extends StatelessWidget {
               )
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
+                children: [
                   Text(
-                    'Create Event',
-                    style: TextStyle(
+                    isEditing ? 'Save Changes' : 'Create Event',
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  SizedBox(width: 8),
-                  Icon(Icons.check_circle_outline, size: 20),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.check_circle_outline, size: 20),
                 ],
               ),
       ),
