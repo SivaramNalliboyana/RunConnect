@@ -61,6 +61,37 @@ class FeedEventCard extends StatelessWidget {
               fit: StackFit.expand,
               children: [
                 _Banner(imageUrl: event.imageUrl),
+                const Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: IgnorePointer(
+                    child: SizedBox(
+                      height: 72,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Color(0x99000000),
+                              Color(0x00000000),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 10,
+                  left: 12,
+                  right: 96,
+                  child: _HostOverlay(
+                    name: event.hostName,
+                    avatarUrl: event.hostAvatarUrl,
+                  ),
+                ),
                 Positioned(
                   top: 0,
                   right: 0,
@@ -87,11 +118,6 @@ class FeedEventCard extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                     color: AppColors.onBackground,
                   ),
-                ),
-                const SizedBox(height: 8),
-                _HostRow(
-                  name: event.hostName,
-                  avatarUrl: event.hostAvatarUrl,
                 ),
                 const SizedBox(height: 10),
                 Row(
@@ -222,57 +248,63 @@ class _GoingBadge extends StatelessWidget {
   }
 }
 
-class _HostRow extends StatelessWidget {
-  const _HostRow({required this.name, this.avatarUrl});
+class _HostOverlay extends StatelessWidget {
+  const _HostOverlay({required this.name, this.avatarUrl});
 
   final String name;
   final String? avatarUrl;
 
+  static const _shadow = [
+    Shadow(color: Color(0xCC000000), blurRadius: 2, offset: Offset(0, 0)),
+    Shadow(color: Color(0x99000000), blurRadius: 6, offset: Offset(0, 1)),
+    Shadow(color: Color(0x66000000), blurRadius: 12, offset: Offset(0, 2)),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 22,
-          height: 22,
-          decoration: const BoxDecoration(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: AppColors.surfaceVariant,
+            border: Border.all(color: Colors.white, width: 1.5),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x66000000),
+                blurRadius: 6,
+                offset: Offset(0, 1),
+              ),
+            ],
           ),
           clipBehavior: Clip.antiAlias,
           child: avatarUrl == null || avatarUrl!.isEmpty
-              ? const Icon(Icons.person, size: 14, color: AppColors.textMuted)
+              ? const Icon(Icons.person, size: 18, color: AppColors.textMuted)
               : Image.network(
                   avatarUrl!,
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => const Icon(
                     Icons.person,
-                    size: 14,
+                    size: 18,
                     color: AppColors.textMuted,
                   ),
                 ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 10),
         Flexible(
-          child: RichText(
+          child: Text(
+            name,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            text: TextSpan(
-              style: const TextStyle(
-                fontSize: 13,
-                color: AppColors.textMuted,
-                fontWeight: FontWeight.w500,
-              ),
-              children: [
-                const TextSpan(text: 'Hosted by '),
-                TextSpan(
-                  text: name,
-                  style: const TextStyle(
-                    color: AppColors.onBackground,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+              letterSpacing: 0.2,
+              shadows: _shadow,
             ),
           ),
         ),

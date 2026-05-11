@@ -88,38 +88,7 @@ class _FeedView extends StatelessWidget {
           const SizedBox(width: 4),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 14),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Discover Events',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.onBackground,
-                  ),
-                ),
-                InkWell(
-                  onTap: () {},
-                  child: const Text(
-                    'View all',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Expanded(child: _FeedBody()),
-        ],
-      ),
+      body: const _FeedBody(),
     );
   }
 }
@@ -163,7 +132,7 @@ class _FeedBody extends StatelessWidget {
                 context.read<FeedBloc>().add(FeedRequested());
               },
               child: ListView.separated(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                 itemCount: state.events.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 14),
                 itemBuilder: (context, index) {
