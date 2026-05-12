@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:runconnect/core/theme/app_colors.dart';
 import 'package:runconnect/core/theme/app_text_styles.dart';
 import 'package:runconnect/features/event/domain/entities/event.dart';
+import 'package:runconnect/features/profile/presentation/widgets/event_participants_sheet.dart';
 
 class FeedEventCard extends StatelessWidget {
   const FeedEventCard({
@@ -10,11 +11,13 @@ class FeedEventCard extends StatelessWidget {
     required this.event,
     required this.onJoinPressed,
     this.isJoined = false,
+    this.isHost = false,
   });
 
   final Event event;
   final VoidCallback onJoinPressed;
   final bool isJoined;
+  final bool isHost;
 
   static const _months = [
     'Jan',
@@ -101,6 +104,13 @@ class FeedEventCard extends StatelessWidget {
                     isFull: isFull,
                     current: event.currentParticipants,
                     max: event.maxParticipants,
+                    onTap: (isJoined || isHost)
+                        ? () => showEventParticipantsSheet(
+                            context,
+                            eventId: event.id,
+                            eventTitle: event.title,
+                          )
+                        : null,
                   ),
                 ),
               ],
@@ -213,20 +223,19 @@ class _GoingBadge extends StatelessWidget {
     required this.isFull,
     required this.current,
     required this.max,
+    this.onTap,
   });
 
   final bool isFull;
   final int current;
   final int max;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final tappable = onTap != null;
+    final content = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.only(bottomLeft: Radius.circular(16)),
-      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -244,7 +253,25 @@ class _GoingBadge extends StatelessWidget {
               color: isFull ? AppColors.error : AppColors.onBackground,
             ),
           ),
+          if (tappable) ...[
+            const SizedBox(width: 4),
+            Icon(
+              Icons.chevron_right,
+              size: 16,
+              color: isFull ? AppColors.error : AppColors.primary,
+            ),
+          ],
         ],
+      ),
+    );
+
+    return Material(
+      color: AppColors.surface,
+      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(16)),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(16)),
+        child: content,
       ),
     );
   }

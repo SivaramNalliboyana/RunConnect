@@ -109,4 +109,15 @@ class ProfileRepositoryImpl implements ProfileRepository {
       throw ServerFailure(e.toString());
     }
   }
+
+  @override
+  Future<List<ProfileSummary>> getEventParticipants(String eventId) async {
+    try {
+      return await _dataSource.getEventParticipants(eventId);
+    } on ServerFailure {
+      rethrow;
+    } catch (e) {
+      throw ServerFailure(e.toString());
+    }
+  }
 }

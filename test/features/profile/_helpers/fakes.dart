@@ -113,6 +113,10 @@ class FakeProfileRepository implements ProfileRepository {
 
   @override
   Future<List<ProfileSummary>> getFollowers(String userId) async => const [];
+
+  @override
+  Future<List<ProfileSummary>> getEventParticipants(String eventId) async =>
+      const [];
 }
 
 class FakeEventRepository implements EventRepository {

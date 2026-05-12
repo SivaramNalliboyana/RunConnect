@@ -31,6 +31,8 @@ abstract class ProfileRemoteDataSource {
   Future<List<ProfileSummary>> getFollowing(String userId);
 
   Future<List<ProfileSummary>> getFollowers(String userId);
+
+  Future<List<ProfileSummary>> getEventParticipants(String eventId);
 }
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
@@ -246,6 +248,69 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       final rows = (results[0] as List).cast<Map<String, dynamic>>();
       final viewerFollowees = results[1] as Set<String>;
       return _toSummaries(rows, viewerFollowees);
+    } on PostgrestException catch (e) {
+      throw ServerFailure(e.message);
+    }
+  }
+
+  @override
+  Future<List<ProfileSummary>> getEventParticipants(String eventId) async {
+    try {
+      final results = await Future.wait<dynamic>([
+        _client
+            .from('events')
+            .select(
+              'host_id,'
+              ' host:profiles!host_id(id, name, avatar_url),'
+              ' participants:event_participants('
+              'profile:profiles!user_id(id, name, avatar_url))',
+            )
+            .eq('id', eventId)
+            .single(),
+        _viewerFollowees(),
+      ]);
+
+      final row = results[0] as Map<String, dynamic>;
+      final viewerFollowees = results[1] as Set<String>;
+      final viewerId = _client.auth.currentUser?.id;
+
+      final hostId = row['host_id'] as String?;
+      final host = row['host'] as Map<String, dynamic>?;
+      final participantRows =
+          (row['participants'] as List?)?.cast<Map<String, dynamic>>() ??
+          const [];
+
+      final list = <ProfileSummary>[];
+      final seen = <String>{};
+
+      if (host != null && hostId != null) {
+        list.add(
+          ProfileSummary(
+            id: hostId,
+            displayName: (host['name'] as String?) ?? 'Runner',
+            avatarUrl: host['avatar_url'] as String?,
+            isFollowing: viewerFollowees.contains(hostId),
+            isHost: true,
+          ),
+        );
+        seen.add(hostId);
+      }
+
+      for (final p in participantRows) {
+        final profile = p['profile'] as Map<String, dynamic>?;
+        if (profile == null) continue;
+        final id = profile['id'] as String;
+        if (!seen.add(id)) continue;
+        list.add(
+          ProfileSummary(
+            id: id,
+            displayName: (profile['name'] as String?) ?? 'Runner',
+            avatarUrl: profile['avatar_url'] as String?,
+            isFollowing: id != viewerId && viewerFollowees.contains(id),
+          ),
+        );
+      }
+      return list;
     } on PostgrestException catch (e) {
       throw ServerFailure(e.message);
     }

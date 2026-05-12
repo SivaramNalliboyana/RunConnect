@@ -18,6 +18,7 @@ import 'package:runconnect/features/profile/presentation/bloc/profile_bloc.dart'
 import 'package:runconnect/features/profile/presentation/bloc/profile_event.dart';
 import 'package:runconnect/features/profile/presentation/bloc/profile_state.dart';
 import 'package:runconnect/features/profile/presentation/widgets/events_stats_row.dart';
+import 'package:runconnect/features/profile/presentation/widgets/event_participants_sheet.dart';
 import 'package:runconnect/features/profile/presentation/widgets/follow_stats_row.dart';
 import 'package:runconnect/features/profile/presentation/widgets/profile_header.dart';
 import 'package:runconnect/features/profile/presentation/widgets/total_km_card.dart';
@@ -462,25 +463,43 @@ class _ProfileEventCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 4),
-          Row(
-            children: [
-              const Icon(
-                Icons.people_outline,
-                size: 13,
-                color: AppColors.primary,
+          InkWell(
+            onTap: () => showEventParticipantsSheet(
+              context,
+              eventId: event.id,
+              eventTitle: event.title,
+            ),
+            borderRadius: BorderRadius.circular(6),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.people_outline,
+                    size: 13,
+                    color: AppColors.primary,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    isPast
+                        ? '${event.currentParticipants} attended'
+                        : '${event.currentParticipants}/${event.maxParticipants} going',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textMuted,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 2),
+                  const Icon(
+                    Icons.chevron_right,
+                    size: 14,
+                    color: AppColors.primary,
+                  ),
+                ],
               ),
-              const SizedBox(width: 6),
-              Text(
-                isPast
-                    ? '${event.currentParticipants} attended'
-                    : '${event.currentParticipants}/${event.maxParticipants} going',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textMuted,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+            ),
           ),
         ],
       ),

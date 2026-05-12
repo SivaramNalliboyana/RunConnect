@@ -4,6 +4,7 @@ class ProfileSummary {
   final String? handle;
   final String? avatarUrl;
   final bool isFollowing;
+  final bool isHost;
 
   const ProfileSummary({
     required this.id,
@@ -11,6 +12,7 @@ class ProfileSummary {
     this.handle,
     this.avatarUrl,
     this.isFollowing = false,
+    this.isHost = false,
   });
 
   ProfileSummary copyWith({bool? isFollowing}) => ProfileSummary(
@@ -19,5 +21,6 @@ class ProfileSummary {
     handle: handle,
     avatarUrl: avatarUrl,
     isFollowing: isFollowing ?? this.isFollowing,
+    isHost: isHost,
   );
 }

@@ -28,4 +28,6 @@ abstract class ProfileRepository {
   Future<List<ProfileSummary>> getFollowing(String userId);
 
   Future<List<ProfileSummary>> getFollowers(String userId);
+
+  Future<List<ProfileSummary>> getEventParticipants(String eventId);
 }

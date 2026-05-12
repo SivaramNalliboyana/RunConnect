@@ -126,6 +126,8 @@ class _FeedBody extends StatelessWidget {
             if (state.events.isEmpty) {
               return const _EmptyView();
             }
+            final currentUserId =
+                Supabase.instance.client.auth.currentUser?.id ?? '';
             return RefreshIndicator(
               color: AppColors.primary,
               onRefresh: () async {
@@ -138,9 +140,11 @@ class _FeedBody extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final event = state.events[index];
                   final isJoined = state.joinedEventIds.contains(event.id);
+                  final isHost = event.hostId == currentUserId;
                   return FeedEventCard(
                     event: event,
                     isJoined: isJoined,
+                    isHost: isHost,
                     onJoinPressed: () {
                       final bloc = context.read<FeedBloc>();
                       bloc.add(

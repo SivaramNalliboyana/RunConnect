@@ -9,11 +9,13 @@ class FollowUserTile extends StatelessWidget {
     required this.user,
     required this.onTogglePressed,
     this.onTap,
+    this.isSelf = false,
   });
 
   final ProfileSummary user;
   final VoidCallback onTogglePressed;
   final VoidCallback? onTap;
+  final bool isSelf;
 
   @override
   Widget build(BuildContext context) {
@@ -29,15 +31,26 @@ class FollowUserTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  user.displayName,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.onBackground,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        user.displayName,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.onBackground,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (user.isHost) ...[
+                      const SizedBox(width: 8),
+                      const _HostBadge(),
+                    ],
+                  ],
                 ),
                 if (user.handle != null) ...[
                   const SizedBox(height: 2),
@@ -51,12 +64,37 @@ class FollowUserTile extends StatelessWidget {
               ],
             ),
           ),
-            const SizedBox(width: 8),
-            _FollowButton(
-              isFollowing: user.isFollowing,
-              onPressed: onTogglePressed,
-            ),
+            if (!isSelf) ...[
+              const SizedBox(width: 8),
+              _FollowButton(
+                isFollowing: user.isFollowing,
+                onPressed: onTogglePressed,
+              ),
+            ],
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HostBadge extends StatelessWidget {
+  const _HostBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: const Text(
+        'Host',
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: AppColors.primary,
         ),
       ),
     );
