@@ -378,7 +378,9 @@ class _JoinButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final label = isJoined ? 'Leave' : (isFull ? 'Full' : 'Join');
-    final background = isJoined ? AppColors.surface : AppColors.primary;
+    final background = isJoined
+        ? AppColors.primary.withValues(alpha: 0.12)
+        : AppColors.primary;
     final foreground = isJoined ? AppColors.primary : AppColors.onPrimary;
 
     return ElevatedButton(
@@ -392,9 +394,7 @@ class _JoinButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 28),
         elevation: 0,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        side: isJoined
-            ? const BorderSide(color: AppColors.primary, width: 1.4)
-            : BorderSide.none,
+        side: BorderSide.none,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),

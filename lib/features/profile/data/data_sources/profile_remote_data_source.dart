@@ -338,13 +338,12 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       final profile = row['profile'] as Map<String, dynamic>?;
       if (profile == null) continue;
       final id = profile['id'] as String;
-      if (id == viewerId) continue;
       list.add(
         ProfileSummary(
           id: id,
           displayName: (profile['name'] as String?) ?? 'Runner',
           avatarUrl: profile['avatar_url'] as String?,
-          isFollowing: viewerFollowees.contains(id),
+          isFollowing: id != viewerId && viewerFollowees.contains(id),
         ),
       );
     }

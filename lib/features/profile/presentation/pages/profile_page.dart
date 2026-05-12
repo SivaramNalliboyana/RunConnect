@@ -171,47 +171,47 @@ class _Loaded extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: Column(
-              children: [
-                const SizedBox(height: 8),
-                ProfileHeader(
-                  displayName: profile.displayName,
-                  avatarUrl: profile.avatarUrl,
-                ),
-                const SizedBox(height: 16),
-                FollowStatsRow(
-                  followingCount: profile.followingCount,
-                  followersCount: profile.followersCount,
-                  onFollowingTap: () =>
-                      context.push('/user/${profile.id}/following'),
-                  onFollowersTap: () =>
-                      context.push('/user/${profile.id}/followers'),
-                ),
-                if (!isCurrentUser) ...[
-                  const SizedBox(height: 16),
-                  const _FollowButton(),
-                ],
-                const SizedBox(height: 20),
-                TotalKmCard(totalKm: profile.totalKmRun),
-                const SizedBox(height: 12),
-                EventsStatsRow(
-                  eventsJoined: profile.eventsJoined,
-                  eventsOrganized: profile.eventsOrganized,
-                ),
-                const SizedBox(height: 24),
-                Padding(
-                  padding: const EdgeInsets.only(right: 0),
-                  child: _MyEventsSection(
-                    upcoming: myEvents.upcoming,
-                    past: myEvents.past,
-                    isCurrentUser: isCurrentUser,
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: Column(
+                children: [
+                  const SizedBox(height: 8),
+                  ProfileHeader(
+                    displayName: profile.displayName,
+                    avatarUrl: profile.avatarUrl,
                   ),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  FollowStatsRow(
+                    followingCount: profile.followingCount,
+                    followersCount: profile.followersCount,
+                    onFollowingTap: () =>
+                        context.push('/user/${profile.id}/following'),
+                    onFollowersTap: () =>
+                        context.push('/user/${profile.id}/followers'),
+                  ),
+                  if (!isCurrentUser) ...[
+                    const SizedBox(height: 16),
+                    const _FollowButton(),
+                  ],
+                  const SizedBox(height: 20),
+                  TotalKmCard(totalKm: profile.totalKmRun),
+                  const SizedBox(height: 12),
+                  EventsStatsRow(
+                    eventsJoined: profile.eventsJoined,
+                    eventsOrganized: profile.eventsOrganized,
+                  ),
+                  const SizedBox(height: 24),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 0),
+                    child: _MyEventsSection(
+                      upcoming: myEvents.upcoming,
+                      past: myEvents.past,
+                      isCurrentUser: isCurrentUser,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
           ],
         ),
       ),
@@ -356,8 +356,18 @@ class _ProfileEventCard extends StatelessWidget {
   final bool showActions;
 
   static const _months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
 
   String _formatDate(DateTime d) =>
@@ -574,9 +584,9 @@ class _FollowButton extends StatelessWidget {
             child: ElevatedButton(
               onPressed: isMutating
                   ? null
-                  : () => context
-                        .read<ProfileBloc>()
-                        .add(FollowToggleRequested()),
+                  : () => context.read<ProfileBloc>().add(
+                      FollowToggleRequested(),
+                    ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: background,
                 foregroundColor: foreground,
@@ -634,14 +644,8 @@ class _EventActionsMenu extends StatelessWidget {
       child: PopupMenuButton<_EventAction>(
         tooltip: 'Event actions',
         padding: EdgeInsets.zero,
-        icon: const Icon(
-          Icons.more_vert,
-          size: 18,
-          color: AppColors.textMuted,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        icon: const Icon(Icons.more_vert, size: 18, color: AppColors.textMuted),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         onSelected: (action) => _handle(context, action),
         itemBuilder: (_) => const [
           PopupMenuItem(
@@ -719,19 +723,12 @@ class _ErrorView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: AppColors.error,
-            ),
+            const Icon(Icons.error_outline, size: 48, color: AppColors.error),
             const SizedBox(height: 12),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.textMuted,
-              ),
+              style: const TextStyle(fontSize: 14, color: AppColors.textMuted),
             ),
             const SizedBox(height: 16),
             ElevatedButton(

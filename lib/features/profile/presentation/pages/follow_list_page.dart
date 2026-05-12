@@ -40,15 +40,16 @@ class FollowListPage extends StatelessWidget {
         currentUserId: currentUserId,
         mode: mode,
       )..add(FollowListRequested()),
-      child: _FollowListView(mode: mode),
+      child: _FollowListView(mode: mode, currentUserId: currentUserId),
     );
   }
 }
 
 class _FollowListView extends StatelessWidget {
-  const _FollowListView({required this.mode});
+  const _FollowListView({required this.mode, required this.currentUserId});
 
   final FollowListMode mode;
+  final String currentUserId;
 
   String get _title => mode == FollowListMode.following ? 'Following' : 'Followers';
 
@@ -112,6 +113,7 @@ class _FollowListView extends StatelessWidget {
                     final user = state.users[i];
                     return FollowUserTile(
                       user: user,
+                      isSelf: user.id == currentUserId,
                       onTap: () => context.push('/user/${user.id}'),
                       onTogglePressed: () => context
                           .read<FollowListBloc>()
