@@ -7,16 +7,16 @@ class DateTimeSection extends StatelessWidget {
     super.key,
     this.date,
     this.time,
-    this.locationController,
     this.onPickDate,
     this.onPickTime,
+    this.locationChild,
   });
 
   final DateTime? date;
   final TimeOfDay? time;
-  final TextEditingController? locationController;
   final VoidCallback? onPickDate;
   final VoidCallback? onPickTime;
+  final Widget? locationChild;
 
   @override
   Widget build(BuildContext context) {
@@ -61,42 +61,14 @@ class DateTimeSection extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Text('Meeting Point', style: AppTextStyles.label),
-          const SizedBox(height: 8),
-          TextField(
-            controller: locationController,
-            decoration: InputDecoration(
-              hintText: 'Search for a location...',
-              hintStyle: AppTextStyles.bodyMuted,
-              prefixIcon: const Icon(
-                Icons.location_on,
-                size: 20,
-                color: AppColors.primary,
-              ),
-              prefixIconConstraints: const BoxConstraints(minWidth: 36),
-              filled: true,
-              fillColor: AppColors.surface,
-              border: _border(),
-              enabledBorder: _border(),
-              focusedBorder: _border(),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 4,
-                vertical: 12,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          const _MapPreview(),
+          if (locationChild != null) ...[
+            const SizedBox(height: 16),
+            locationChild!,
+          ],
         ],
       ),
     );
   }
-
-  static OutlineInputBorder _border() => OutlineInputBorder(
-    borderRadius: BorderRadius.circular(8),
-    borderSide: const BorderSide(color: Colors.black12),
-  );
 
   static String _formatDate(DateTime d) =>
       '${d.month.toString().padLeft(2, '0')}/'
@@ -156,30 +128,3 @@ class _PickerField extends StatelessWidget {
   }
 }
 
-class _MapPreview extends StatelessWidget {
-  const _MapPreview();
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        height: 130,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF6FA1B5), Color(0xFF8AB58A)],
-          ),
-        ),
-        child: const Center(
-          child: Icon(
-            Icons.location_on,
-            color: AppColors.primary,
-            size: 36,
-          ),
-        ),
-      ),
-    );
-  }
-}

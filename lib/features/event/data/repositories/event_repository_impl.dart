@@ -16,6 +16,8 @@ class EventRepositoryImpl implements EventRepository {
     required PaceLevel paceLevel,
     required DateTime startsAt,
     required String meetingPoint,
+    double? lat,
+    double? lng,
     XFile? image,
   }) async {
     try {
@@ -26,6 +28,8 @@ class EventRepositoryImpl implements EventRepository {
         paceLevel: paceLevel,
         startsAt: startsAt,
         meetingPoint: meetingPoint,
+        lat: lat,
+        lng: lng,
         image: image,
       );
     } on ServerFailure {
@@ -44,6 +48,8 @@ class EventRepositoryImpl implements EventRepository {
     required PaceLevel paceLevel,
     required DateTime startsAt,
     required String meetingPoint,
+    double? lat,
+    double? lng,
   }) async {
     try {
       return await _dataSource.updateEvent(
@@ -54,6 +60,8 @@ class EventRepositoryImpl implements EventRepository {
         paceLevel: paceLevel,
         startsAt: startsAt,
         meetingPoint: meetingPoint,
+        lat: lat,
+        lng: lng,
       );
     } on ServerFailure {
       rethrow;

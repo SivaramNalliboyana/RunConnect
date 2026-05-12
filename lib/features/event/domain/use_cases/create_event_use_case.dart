@@ -13,6 +13,8 @@ class CreateEventUseCase {
     required PaceLevel paceLevel,
     required DateTime startsAt,
     required String meetingPoint,
+    double? lat,
+    double? lng,
     XFile? image,
   }) {
     return _repository.createEvent(
@@ -22,6 +24,8 @@ class CreateEventUseCase {
       paceLevel: paceLevel,
       startsAt: startsAt,
       meetingPoint: meetingPoint,
+      lat: lat,
+      lng: lng,
       image: image,
     );
   }

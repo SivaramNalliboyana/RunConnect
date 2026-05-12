@@ -19,12 +19,16 @@ class CreateEventSubmitted extends CreateEventEvent {
   final int maxParticipants;
   final DateTime startsAt;
   final String meetingPoint;
+  final double? lat;
+  final double? lng;
   CreateEventSubmitted({
     required this.title,
     required this.distanceKm,
     required this.maxParticipants,
     required this.startsAt,
     required this.meetingPoint,
+    this.lat,
+    this.lng,
   });
 }
 
@@ -36,6 +40,8 @@ class UpdateEventSubmitted extends CreateEventEvent {
   final PaceLevel paceLevel;
   final DateTime startsAt;
   final String meetingPoint;
+  final double? lat;
+  final double? lng;
   UpdateEventSubmitted({
     required this.eventId,
     required this.title,
@@ -44,5 +50,7 @@ class UpdateEventSubmitted extends CreateEventEvent {
     required this.paceLevel,
     required this.startsAt,
     required this.meetingPoint,
+    this.lat,
+    this.lng,
   });
 }

@@ -9,6 +9,8 @@ abstract class EventRepository {
     required PaceLevel paceLevel,
     required DateTime startsAt,
     required String meetingPoint,
+    double? lat,
+    double? lng,
     XFile? image,
   });
 
@@ -20,6 +22,8 @@ abstract class EventRepository {
     required PaceLevel paceLevel,
     required DateTime startsAt,
     required String meetingPoint,
+    double? lat,
+    double? lng,
   });
 
   Future<void> deleteEvent(String eventId);

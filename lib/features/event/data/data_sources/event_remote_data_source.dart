@@ -12,6 +12,8 @@ abstract class EventRemoteDataSource {
     required PaceLevel paceLevel,
     required DateTime startsAt,
     required String meetingPoint,
+    double? lat,
+    double? lng,
     XFile? image,
   });
 
@@ -23,6 +25,8 @@ abstract class EventRemoteDataSource {
     required PaceLevel paceLevel,
     required DateTime startsAt,
     required String meetingPoint,
+    double? lat,
+    double? lng,
   });
 
   Future<void> deleteEvent(String eventId);
@@ -46,6 +50,8 @@ class EventRemoteDataSourceImpl implements EventRemoteDataSource {
     required PaceLevel paceLevel,
     required DateTime startsAt,
     required String meetingPoint,
+    double? lat,
+    double? lng,
     XFile? image,
   }) async {
     final user = _client.auth.currentUser;
@@ -85,6 +91,8 @@ class EventRemoteDataSourceImpl implements EventRemoteDataSource {
             'pace_level': paceLevel.name,
             'starts_at': startsAt.toUtc().toIso8601String(),
             'meeting_point': meetingPoint,
+            'lat': lat,
+            'lng': lng,
             'image_url': imageUrl,
           })
           .select()
@@ -99,6 +107,8 @@ class EventRemoteDataSourceImpl implements EventRemoteDataSource {
         paceLevel: PaceLevel.values.byName(inserted['pace_level'] as String),
         startsAt: DateTime.parse(inserted['starts_at'] as String),
         meetingPoint: inserted['meeting_point'] as String,
+        lat: (inserted['lat'] as num?)?.toDouble(),
+        lng: (inserted['lng'] as num?)?.toDouble(),
         imageUrl: inserted['image_url'] as String?,
         hostId: user.id,
         hostName: (meta['name'] as String?) ?? 'Runner',
@@ -118,6 +128,8 @@ class EventRemoteDataSourceImpl implements EventRemoteDataSource {
     required PaceLevel paceLevel,
     required DateTime startsAt,
     required String meetingPoint,
+    double? lat,
+    double? lng,
   }) async {
     final user = _client.auth.currentUser;
     if (user == null) {
@@ -134,6 +146,8 @@ class EventRemoteDataSourceImpl implements EventRemoteDataSource {
             'pace_level': paceLevel.name,
             'starts_at': startsAt.toUtc().toIso8601String(),
             'meeting_point': meetingPoint,
+            'lat': lat,
+            'lng': lng,
           })
           .eq('id', eventId)
           .eq('host_id', user.id)
@@ -159,6 +173,8 @@ class EventRemoteDataSourceImpl implements EventRemoteDataSource {
         paceLevel: PaceLevel.values.byName(updated['pace_level'] as String),
         startsAt: DateTime.parse(updated['starts_at'] as String),
         meetingPoint: updated['meeting_point'] as String,
+        lat: (updated['lat'] as num?)?.toDouble(),
+        lng: (updated['lng'] as num?)?.toDouble(),
         imageUrl: updated['image_url'] as String?,
         hostId: updated['host_id'] as String,
         hostName: (host?['name'] as String?) ?? 'Runner',

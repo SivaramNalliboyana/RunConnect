@@ -55,6 +55,8 @@ class CreateEventBloc extends Bloc<CreateEventEvent, CreateEventState> {
         paceLevel: paceLevel,
         startsAt: event.startsAt,
         meetingPoint: event.meetingPoint,
+        lat: event.lat,
+        lng: event.lng,
         image: state.image,
       );
       emit(state.copyWith(isSubmitting: false, savedEvent: created));
@@ -86,6 +88,8 @@ class CreateEventBloc extends Bloc<CreateEventEvent, CreateEventState> {
         paceLevel: event.paceLevel,
         startsAt: event.startsAt,
         meetingPoint: event.meetingPoint,
+        lat: event.lat,
+        lng: event.lng,
       );
       emit(state.copyWith(isSubmitting: false, savedEvent: updated));
     } on Failure catch (e) {

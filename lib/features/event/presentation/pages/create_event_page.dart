@@ -12,6 +12,7 @@ import 'package:runconnect/features/event/presentation/bloc/create_event_event.d
 import 'package:runconnect/features/event/presentation/bloc/create_event_state.dart';
 import 'package:runconnect/features/event/presentation/widgets/date_time_section.dart';
 import 'package:runconnect/features/event/presentation/widgets/labeled_field.dart';
+import 'package:runconnect/features/event/presentation/widgets/location_picker_field.dart';
 import 'package:runconnect/features/event/presentation/widgets/pace_level_selector.dart';
 import 'package:runconnect/features/event/presentation/widgets/run_image_banner.dart';
 import 'package:runconnect/features/profile/domain/entities/profile_event_item.dart';
@@ -63,6 +64,8 @@ class _CreateEventViewState extends State<_CreateEventView> {
 
   DateTime? _date;
   TimeOfDay? _time;
+  double? _lat;
+  double? _lng;
 
   bool get _isEditing => widget.eventToEdit != null;
 
@@ -81,6 +84,8 @@ class _CreateEventViewState extends State<_CreateEventView> {
     if (e != null) {
       _date = DateTime(e.startsAt.year, e.startsAt.month, e.startsAt.day);
       _time = TimeOfDay(hour: e.startsAt.hour, minute: e.startsAt.minute);
+      _lat = e.lat;
+      _lng = e.lng;
     }
   }
 
@@ -160,6 +165,8 @@ class _CreateEventViewState extends State<_CreateEventView> {
           paceLevel: state.paceLevel!,
           startsAt: startsAt,
           meetingPoint: _meetingPoint.text.trim(),
+          lat: _lat,
+          lng: _lng,
         ),
       );
     } else {
@@ -170,6 +177,8 @@ class _CreateEventViewState extends State<_CreateEventView> {
           maxParticipants: int.tryParse(_maxParticipants.text) ?? 0,
           startsAt: startsAt,
           meetingPoint: _meetingPoint.text.trim(),
+          lat: _lat,
+          lng: _lng,
         ),
       );
     }
@@ -260,9 +269,19 @@ class _CreateEventViewState extends State<_CreateEventView> {
                         DateTimeSection(
                           date: _date,
                           time: _time,
-                          locationController: _meetingPoint,
                           onPickDate: _pickDate,
                           onPickTime: _pickTime,
+                          locationChild: LocationPickerField(
+                            controller: _meetingPoint,
+                            initialLat: _lat,
+                            initialLng: _lng,
+                            onLatLngChanged: (lat, lng) {
+                              setState(() {
+                                _lat = lat;
+                                _lng = lng;
+                              });
+                            },
+                          ),
                         ),
                       ],
                     ),

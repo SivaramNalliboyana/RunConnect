@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:runconnect/core/secrets/app_secrets.dart';
 import 'package:runconnect/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:runconnect/features/auth/data/repositories/auth_repository_impl.dart';
@@ -20,6 +22,12 @@ Future<void> main() async {
     url: AppConfig.supabaseUrl,
     anonKey: AppConfig.annonkey,
   );
+  if (!kIsWeb) {
+    final mapboxToken = dotenv.env['MAPBOX_PUBLIC_TOKEN'];
+    if (mapboxToken != null && mapboxToken.isNotEmpty) {
+      MapboxOptions.setAccessToken(mapboxToken);
+    }
+  }
   runApp(const RunConnectApp());
 }
 

@@ -37,6 +37,8 @@ class Event {
   final PaceLevel paceLevel;
   final DateTime startsAt;
   final String meetingPoint;
+  final double? lat;
+  final double? lng;
   final String? imageUrl;
   final String hostId;
   final String hostName;
@@ -53,6 +55,8 @@ class Event {
     required this.hostId,
     required this.hostName,
     this.currentParticipants = 0,
+    this.lat,
+    this.lng,
     this.imageUrl,
     this.hostAvatarUrl,
   });

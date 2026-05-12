@@ -65,6 +65,8 @@ class FeedRemoteDataSourceImpl implements FeedRemoteDataSource {
       paceLevel: PaceLevel.values.byName(map['pace_level'] as String),
       startsAt: DateTime.parse(map['starts_at'] as String),
       meetingPoint: map['meeting_point'] as String,
+      lat: (map['lat'] as num?)?.toDouble(),
+      lng: (map['lng'] as num?)?.toDouble(),
       imageUrl: map['image_url'] as String?,
       hostId: map['host_id'] as String,
       hostName: (host?['name'] as String?) ?? 'Runner',

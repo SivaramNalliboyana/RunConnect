@@ -13,6 +13,8 @@ class UpdateEventUseCase {
     required PaceLevel paceLevel,
     required DateTime startsAt,
     required String meetingPoint,
+    double? lat,
+    double? lng,
   }) {
     return _repository.updateEvent(
       eventId: eventId,
@@ -22,6 +24,8 @@ class UpdateEventUseCase {
       paceLevel: paceLevel,
       startsAt: startsAt,
       meetingPoint: meetingPoint,
+      lat: lat,
+      lng: lng,
     );
   }
 }

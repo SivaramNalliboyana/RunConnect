@@ -92,7 +92,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     try {
       const eventColumns =
           'id, title, distance_km, max_participants, pace_level, starts_at, '
-          'meeting_point, image_url, host_id, '
+          'meeting_point, lat, lng, image_url, host_id, '
           'participants:event_participants(count)';
       final results = await Future.wait<dynamic>([
         _client.from('events').select(eventColumns).eq('host_id', userId),
@@ -155,6 +155,8 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       currentParticipants: currentParticipants,
       paceLevel: PaceLevel.values.byName(row['pace_level'] as String),
       meetingPoint: row['meeting_point'] as String,
+      lat: (row['lat'] as num?)?.toDouble(),
+      lng: (row['lng'] as num?)?.toDouble(),
       imageUrl: row['image_url'] as String?,
       isHosting: (row['host_id'] as String?) == userId,
     );

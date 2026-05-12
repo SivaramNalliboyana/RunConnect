@@ -9,6 +9,8 @@ class ProfileEventItem {
   final int currentParticipants;
   final PaceLevel paceLevel;
   final String meetingPoint;
+  final double? lat;
+  final double? lng;
   final String? imageUrl;
   final bool isHosting;
 
@@ -22,6 +24,8 @@ class ProfileEventItem {
     required this.paceLevel,
     required this.meetingPoint,
     required this.isHosting,
+    this.lat,
+    this.lng,
     this.imageUrl,
   });
 }
