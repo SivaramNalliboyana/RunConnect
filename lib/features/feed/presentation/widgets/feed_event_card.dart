@@ -47,7 +47,10 @@ class FeedEventCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isFull = event.isFull;
-    return Container(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => context.push('/event', extra: event),
+      child: Container(
       width: double.infinity,
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -213,6 +216,7 @@ class FeedEventCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }

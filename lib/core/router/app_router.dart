@@ -5,7 +5,9 @@ import 'package:runconnect/core/presentation/scaffold/main_scaffold.dart';
 import 'package:runconnect/features/auth/presentation/pages/auth_page.dart';
 import 'package:runconnect/features/auth/presentation/pages/login_page.dart';
 import 'package:runconnect/features/board/presentation/pages/board_page.dart';
+import 'package:runconnect/features/event/domain/entities/event.dart';
 import 'package:runconnect/features/event/presentation/pages/create_event_page.dart';
+import 'package:runconnect/features/event/presentation/pages/event_detail_page.dart';
 import 'package:runconnect/features/feed/presentation/pages/feed_page.dart';
 import 'package:runconnect/features/map/presentation/pages/map_page.dart';
 import 'package:runconnect/features/profile/domain/entities/profile_event_item.dart';
@@ -42,6 +44,19 @@ final appRouter = GoRouter(
       builder: (context, state) {
         final event = state.extra as ProfileEventItem?;
         return CreateEventPage(eventToEdit: event);
+      },
+    ),
+    GoRoute(
+      path: '/event',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final event = state.extra as Event?;
+        if (event == null) {
+          return const Scaffold(
+            body: Center(child: Text('Event unavailable')),
+          );
+        }
+        return EventDetailPage(event: event);
       },
     ),
     GoRoute(
