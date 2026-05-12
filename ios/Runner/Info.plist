@@ -8,6 +8,8 @@
 	<string>RunConnect needs access to your camera to take a profile picture.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>RunConnect needs access to your microphone to record videos.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>RunConnect uses your location to set the meeting point on the map when you create or view an event.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
