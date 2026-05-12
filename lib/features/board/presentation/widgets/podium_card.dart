@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:runconnect/core/theme/app_colors.dart';
 import 'package:runconnect/features/board/domain/entities/leaderboard_entry.dart';
 
@@ -10,9 +11,9 @@ class PodiumCard extends StatelessWidget {
     required this.third,
   });
 
-  final LeaderboardEntry first;
-  final LeaderboardEntry second;
-  final LeaderboardEntry third;
+  final LeaderboardEntry? first;
+  final LeaderboardEntry? second;
+  final LeaderboardEntry? third;
 
   static const _gold = Color(0xFFE2B33B);
   static const _silver = Color(0xFFC9CDD2);
@@ -45,8 +46,9 @@ class PodiumCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Expanded(
-                    child: _Runner(
+                    child: _PodiumSlot(
                       entry: second,
+                      rank: 2,
                       ringColor: _silver,
                       ringSize: 78,
                       badgeColor: _silver,
@@ -54,8 +56,9 @@ class PodiumCard extends StatelessWidget {
                     ),
                   ),
                   Expanded(
-                    child: _Runner(
+                    child: _PodiumSlot(
                       entry: first,
+                      rank: 1,
                       ringColor: _gold,
                       ringSize: 96,
                       badgeColor: _gold,
@@ -63,8 +66,9 @@ class PodiumCard extends StatelessWidget {
                     ),
                   ),
                   Expanded(
-                    child: _Runner(
+                    child: _PodiumSlot(
                       entry: third,
+                      rank: 3,
                       ringColor: _bronze,
                       ringSize: 78,
                       badgeColor: _bronze,
@@ -83,16 +87,18 @@ class PodiumCard extends StatelessWidget {
   }
 }
 
-class _Runner extends StatelessWidget {
-  const _Runner({
+class _PodiumSlot extends StatelessWidget {
+  const _PodiumSlot({
     required this.entry,
+    required this.rank,
     required this.ringColor,
     required this.ringSize,
     required this.badgeColor,
     required this.isWinner,
   });
 
-  final LeaderboardEntry entry;
+  final LeaderboardEntry? entry;
+  final int rank;
   final Color ringColor;
   final double ringSize;
   final Color badgeColor;
@@ -100,7 +106,11 @@ class _Runner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    final empty = entry == null;
+    return InkWell(
+      onTap: empty ? null : () => context.push('/user/${entry!.id}'),
+      borderRadius: BorderRadius.circular(8),
+      child: Column(
       children: [
         SizedBox(
           height: ringSize + 10,
@@ -114,54 +124,71 @@ class _Runner extends StatelessWidget {
                 height: ringSize,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: ringColor, width: 4),
+                  border: Border.all(
+                    color: empty
+                        ? ringColor.withValues(alpha: 0.35)
+                        : ringColor,
+                    width: 4,
+                  ),
                   color: AppColors.surfaceVariant,
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: entry.avatarUrl == null
+                child: empty
                     ? Icon(
-                        Icons.directions_run,
-                        size: ringSize * 0.55,
-                        color: AppColors.primary,
+                        Icons.help_outline,
+                        size: ringSize * 0.45,
+                        color: AppColors.textMuted.withValues(alpha: 0.6),
                       )
-                    : Image.network(
-                        entry.avatarUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Icon(
-                          Icons.directions_run,
-                          size: ringSize * 0.55,
-                          color: AppColors.primary,
-                        ),
-                      ),
+                    : entry!.avatarUrl == null
+                        ? Icon(
+                            Icons.directions_run,
+                            size: ringSize * 0.55,
+                            color: AppColors.primary,
+                          )
+                        : Image.network(
+                            entry!.avatarUrl!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Icon(
+                              Icons.directions_run,
+                              size: ringSize * 0.55,
+                              color: AppColors.primary,
+                            ),
+                          ),
               ),
               Positioned(
                 top: -4,
-                child: _RankBadge(rank: entry.rank, color: badgeColor),
+                child: _RankBadge(
+                  rank: rank,
+                  color: empty ? badgeColor.withValues(alpha: 0.5) : badgeColor,
+                ),
               ),
             ],
           ),
         ),
         const SizedBox(height: 6),
         Text(
-          entry.displayName,
+          empty ? 'TBD' : entry!.displayName,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontSize: isWinner ? 15 : 13,
             fontWeight: FontWeight.w700,
-            color: AppColors.onBackground,
+            color: empty ? AppColors.textMuted : AppColors.onBackground,
           ),
         ),
         const SizedBox(height: 2),
         Text(
-          '${_formatKm(entry.distanceKm)} km',
+          empty ? '—' : '${_formatKm(entry!.distanceKm)} km',
           style: TextStyle(
             fontSize: isWinner ? 16 : 13,
             fontWeight: FontWeight.w600,
-            color: AppColors.primary,
+            color: empty
+                ? AppColors.textMuted
+                : AppColors.primary,
           ),
         ),
       ],
+      ),
     );
   }
 

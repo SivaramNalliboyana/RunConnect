@@ -2,6 +2,8 @@ import 'board_state.dart';
 
 abstract class BoardEvent {}
 
+class BoardLoadRequested extends BoardEvent {}
+
 class BoardPeriodChanged extends BoardEvent {
   BoardPeriodChanged(this.period);
   final LeaderboardPeriod period;
