@@ -1,4 +1,5 @@
-import 'package:image_picker/image_picker.dart';
+import 'dart:typed_data';
+
 import 'package:runconnect/features/event/domain/entities/event.dart';
 
 abstract class EventRepository {
@@ -11,7 +12,8 @@ abstract class EventRepository {
     required String meetingPoint,
     double? lat,
     double? lng,
-    XFile? image,
+    Uint8List? imageBytes,
+    String? imageMimeType,
   });
 
   Future<Event> updateEvent({

@@ -1,11 +1,13 @@
-import 'package:image_picker/image_picker.dart';
+import 'dart:typed_data';
+
 import 'package:runconnect/features/event/domain/entities/event.dart';
 
 abstract class CreateEventEvent {}
 
 class CreateEventImagePicked extends CreateEventEvent {
-  final XFile image;
-  CreateEventImagePicked(this.image);
+  final Uint8List bytes;
+  final String mimeType;
+  CreateEventImagePicked({required this.bytes, required this.mimeType});
 }
 
 class CreateEventPaceLevelSelected extends CreateEventEvent {

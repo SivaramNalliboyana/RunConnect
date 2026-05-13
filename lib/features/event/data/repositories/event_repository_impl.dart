@@ -1,4 +1,5 @@
-import 'package:image_picker/image_picker.dart';
+import 'dart:typed_data';
+
 import 'package:runconnect/core/error/failures.dart';
 import 'package:runconnect/features/event/data/data_sources/event_remote_data_source.dart';
 import 'package:runconnect/features/event/domain/entities/event.dart';
@@ -18,7 +19,8 @@ class EventRepositoryImpl implements EventRepository {
     required String meetingPoint,
     double? lat,
     double? lng,
-    XFile? image,
+    Uint8List? imageBytes,
+    String? imageMimeType,
   }) async {
     try {
       return await _dataSource.createEvent(
@@ -30,7 +32,8 @@ class EventRepositoryImpl implements EventRepository {
         meetingPoint: meetingPoint,
         lat: lat,
         lng: lng,
-        image: image,
+        imageBytes: imageBytes,
+        imageMimeType: imageMimeType,
       );
     } on ServerFailure {
       rethrow;

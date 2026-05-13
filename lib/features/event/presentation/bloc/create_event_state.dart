@@ -1,15 +1,18 @@
-import 'package:image_picker/image_picker.dart';
+import 'dart:typed_data';
+
 import 'package:runconnect/features/event/domain/entities/event.dart';
 
 class CreateEventState {
-  final XFile? image;
+  final Uint8List? imageBytes;
+  final String? imageMimeType;
   final PaceLevel? paceLevel;
   final bool isSubmitting;
   final String? errorMessage;
   final Event? savedEvent;
 
   const CreateEventState({
-    this.image,
+    this.imageBytes,
+    this.imageMimeType,
     this.paceLevel,
     this.isSubmitting = false,
     this.errorMessage,
@@ -18,17 +21,17 @@ class CreateEventState {
 
   const CreateEventState.initial() : this();
 
-  String? get imagePath => image?.path;
-
   CreateEventState copyWith({
-    XFile? image,
+    Uint8List? imageBytes,
+    String? imageMimeType,
     PaceLevel? paceLevel,
     bool? isSubmitting,
     String? errorMessage,
     Event? savedEvent,
   }) {
     return CreateEventState(
-      image: image ?? this.image,
+      imageBytes: imageBytes ?? this.imageBytes,
+      imageMimeType: imageMimeType ?? this.imageMimeType,
       paceLevel: paceLevel ?? this.paceLevel,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       errorMessage: errorMessage,

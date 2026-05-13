@@ -25,7 +25,10 @@ class CreateEventBloc extends Bloc<CreateEventEvent, CreateEventState> {
     CreateEventImagePicked event,
     Emitter<CreateEventState> emit,
   ) {
-    emit(state.copyWith(image: event.image));
+    emit(state.copyWith(
+      imageBytes: event.bytes,
+      imageMimeType: event.mimeType,
+    ));
   }
 
   void _onPaceLevelSelected(
@@ -57,7 +60,8 @@ class CreateEventBloc extends Bloc<CreateEventEvent, CreateEventState> {
         meetingPoint: event.meetingPoint,
         lat: event.lat,
         lng: event.lng,
-        image: state.image,
+        imageBytes: state.imageBytes,
+        imageMimeType: state.imageMimeType,
       );
       emit(state.copyWith(isSubmitting: false, savedEvent: created));
     } on Failure catch (e) {

@@ -1,4 +1,5 @@
-import 'package:image_picker/image_picker.dart';
+import 'dart:typed_data';
+
 import 'package:runconnect/features/event/domain/entities/event.dart';
 import '../repositories/event_repository.dart';
 
@@ -15,7 +16,8 @@ class CreateEventUseCase {
     required String meetingPoint,
     double? lat,
     double? lng,
-    XFile? image,
+    Uint8List? imageBytes,
+    String? imageMimeType,
   }) {
     return _repository.createEvent(
       title: title,
@@ -26,7 +28,8 @@ class CreateEventUseCase {
       meetingPoint: meetingPoint,
       lat: lat,
       lng: lng,
-      image: image,
+      imageBytes: imageBytes,
+      imageMimeType: imageMimeType,
     );
   }
 }

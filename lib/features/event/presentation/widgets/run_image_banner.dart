@@ -1,17 +1,17 @@
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
 class RunImageBanner extends StatelessWidget {
   const RunImageBanner({
     super.key,
-    this.imagePath,
+    this.imageBytes,
     this.imageUrl,
     this.onTap,
     this.showEditIcon = true,
   });
 
-  final String? imagePath;
+  final Uint8List? imageBytes;
   final String? imageUrl;
   final VoidCallback? onTap;
   final bool showEditIcon;
@@ -27,8 +27,8 @@ class RunImageBanner extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              if (imagePath != null)
-                Image.file(File(imagePath!), fit: BoxFit.cover)
+              if (imageBytes != null)
+                Image.memory(imageBytes!, fit: BoxFit.cover)
               else if (imageUrl != null && imageUrl!.isNotEmpty)
                 Image.network(
                   imageUrl!,

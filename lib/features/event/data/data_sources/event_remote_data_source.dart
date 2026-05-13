@@ -1,4 +1,5 @@
-import 'package:image_picker/image_picker.dart';
+import 'dart:typed_data';
+
 import 'package:runconnect/core/error/failures.dart';
 import 'package:runconnect/features/event/domain/entities/event.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -14,7 +15,8 @@ abstract class EventRemoteDataSource {
     required String meetingPoint,
     double? lat,
     double? lng,
-    XFile? image,
+    Uint8List? imageBytes,
+    String? imageMimeType,
   });
 
   Future<Event> updateEvent({
@@ -52,7 +54,8 @@ class EventRemoteDataSourceImpl implements EventRemoteDataSource {
     required String meetingPoint,
     double? lat,
     double? lng,
-    XFile? image,
+    Uint8List? imageBytes,
+    String? imageMimeType,
   }) async {
     final user = _client.auth.currentUser;
     if (user == null) {
@@ -60,18 +63,18 @@ class EventRemoteDataSourceImpl implements EventRemoteDataSource {
     }
 
     String? imageUrl;
-    if (image != null) {
+    if (imageBytes != null) {
       try {
-        final bytes = await image.readAsBytes();
-        final ext = image.path.split('.').last;
+        final mime = imageMimeType ?? 'image/jpeg';
+        final ext = mime.split('/').last;
         final path = '${user.id}/${const Uuid().v4()}.$ext';
 
         await _client.storage
             .from(_bucket)
             .uploadBinary(
               path,
-              bytes,
-              fileOptions: FileOptions(contentType: 'image/$ext'),
+              imageBytes,
+              fileOptions: FileOptions(contentType: mime),
             );
 
         imageUrl = _client.storage.from(_bucket).getPublicUrl(path);

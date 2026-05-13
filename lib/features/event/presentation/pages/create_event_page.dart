@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -106,7 +108,34 @@ class _CreateEventViewState extends State<_CreateEventView> {
   Future<void> _pickImage() async {
     final picked = await _picker.pickImage(source: ImageSource.gallery);
     if (picked == null || !mounted) return;
-    context.read<CreateEventBloc>().add(CreateEventImagePicked(picked));
+
+    // Read bytes immediately so we don't depend on the cache path later.
+    // image_picker on Android can return an XFile pointing at a not-yet-
+    // materialized cache file on first pick — capturing bytes here makes
+    // both the preview and the upload independent of that race.
+    final Uint8List bytes;
+    try {
+      bytes = await picked.readAsBytes();
+    } catch (_) {
+      if (!mounted) return;
+      _snack('Could not read the selected image. Please try again.');
+      return;
+    }
+    if (!mounted) return;
+
+    final mimeType = picked.mimeType ?? _mimeFromName(picked.name);
+    context.read<CreateEventBloc>().add(
+      CreateEventImagePicked(bytes: bytes, mimeType: mimeType),
+    );
+  }
+
+  String _mimeFromName(String name) {
+    final lower = name.toLowerCase();
+    if (lower.endsWith('.png')) return 'image/png';
+    if (lower.endsWith('.webp')) return 'image/webp';
+    if (lower.endsWith('.heic')) return 'image/heic';
+    if (lower.endsWith('.heif')) return 'image/heif';
+    return 'image/jpeg';
   }
 
   Future<void> _pickDate() async {
@@ -118,6 +147,7 @@ class _CreateEventViewState extends State<_CreateEventView> {
       firstDate: now,
       lastDate: now.add(const Duration(days: 365)),
     );
+    if (!mounted) return;
     if (picked != null) setState(() => _date = picked);
   }
 
@@ -126,6 +156,7 @@ class _CreateEventViewState extends State<_CreateEventView> {
       context: context,
       initialTime: _time ?? TimeOfDay.now(),
     );
+    if (!mounted) return;
     if (picked != null) setState(() => _time = picked);
   }
 
@@ -235,7 +266,7 @@ class _CreateEventViewState extends State<_CreateEventView> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         RunImageBanner(
-                          imagePath: state.imagePath,
+                          imageBytes: state.imageBytes,
                           imageUrl: editing?.imageUrl,
                           onTap: _isEditing ? null : _pickImage,
                           showEditIcon: !_isEditing,
