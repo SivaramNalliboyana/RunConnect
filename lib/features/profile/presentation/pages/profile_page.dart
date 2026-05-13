@@ -684,19 +684,19 @@ class _EventActionsMenu extends StatelessWidget {
       case _EventAction.delete:
         final confirmed = await showDialog<bool>(
           context: context,
-          builder: (_) => AlertDialog(
+          builder: (dialogContext) => AlertDialog(
             title: const Text('Delete event?'),
             content: Text(
               '“${event.title}” will be removed for everyone who joined.',
             ),
             actions: [
               TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
+                onPressed: () => Navigator.of(dialogContext).pop(false),
                 child: const Text('Cancel'),
               ),
               TextButton(
                 style: TextButton.styleFrom(foregroundColor: AppColors.error),
-                onPressed: () => Navigator.of(context).pop(true),
+                onPressed: () => Navigator.of(dialogContext).pop(true),
                 child: const Text('Delete'),
               ),
             ],

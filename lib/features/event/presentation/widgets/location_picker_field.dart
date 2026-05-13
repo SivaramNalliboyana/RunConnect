@@ -127,6 +127,7 @@ class _LocationPickerFieldState extends State<LocationPickerField> {
     });
     widget.onLatLngChanged(place.lat, place.lng);
     await _placePin(place.lat, place.lng, animate: true);
+    if (!mounted) return;
     FocusScope.of(context).unfocus();
   }
 
@@ -135,13 +136,16 @@ class _LocationPickerFieldState extends State<LocationPickerField> {
     setState(() => _locating = true);
     try {
       final enabled = await Geolocator.isLocationServiceEnabled();
+      if (!mounted) return;
       if (!enabled) {
         _snack('Turn on location services to use this');
         return;
       }
       var perm = await Geolocator.checkPermission();
+      if (!mounted) return;
       if (perm == LocationPermission.denied) {
         perm = await Geolocator.requestPermission();
+        if (!mounted) return;
       }
       if (perm == LocationPermission.denied ||
           perm == LocationPermission.deniedForever) {
@@ -152,6 +156,7 @@ class _LocationPickerFieldState extends State<LocationPickerField> {
       if (!mounted) return;
 
       final name = await _reverseGeocode(pos.latitude, pos.longitude);
+      if (!mounted) return;
       _suppressNextSearch = true;
       widget.controller.text = name ?? 'Current location';
       widget.controller.selection = TextSelection.collapsed(
@@ -165,7 +170,7 @@ class _LocationPickerFieldState extends State<LocationPickerField> {
       widget.onLatLngChanged(pos.latitude, pos.longitude);
       await _placePin(pos.latitude, pos.longitude, animate: true);
     } catch (e) {
-      _snack('Could not get location');
+      if (mounted) _snack('Could not get location');
     } finally {
       if (mounted) setState(() => _locating = false);
     }
