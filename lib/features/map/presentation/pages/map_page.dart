@@ -49,6 +49,14 @@ class _MapViewState extends State<_MapView> {
 
   static const _radiusOptions = [25, 50, 100];
 
+  // A single shared viewport instance. MapWidget rebuilds reassert the
+  // camera every time the viewport REFERENCE changes — so we hand it the
+  // same instance forever and drive the camera ourselves via flyTo.
+  static final _initialViewport = CameraViewportState(
+    center: Point(coordinates: Position(_fallbackLng, _fallbackLat)),
+    zoom: 11,
+  );
+
   MapboxMap? _mapbox;
   PointAnnotationManager? _annotations;
   final Map<String, Event> _annotationToEvent = {};
@@ -519,12 +527,7 @@ class _MapViewState extends State<_MapView> {
   Widget _mapView() {
     return MapWidget(
       key: const ValueKey('map-page'),
-      viewport: CameraViewportState(
-        center: Point(
-          coordinates: Position(_fallbackLng, _fallbackLat),
-        ),
-        zoom: 11,
-      ),
+      viewport: _initialViewport,
       styleUri: MapboxStyles.MAPBOX_STREETS,
       onMapCreated: _onMapCreated,
       onMapIdleListener: _onMapIdle,
